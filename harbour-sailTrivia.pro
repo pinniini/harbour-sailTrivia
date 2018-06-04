@@ -25,7 +25,9 @@ DISTFILES += qml/harbour-sailTrivia.qml \
     rpm/harbour-sailTrivia.spec \
     rpm/harbour-sailTrivia.yaml \
     translations/*.ts \
-    harbour-sailTrivia.desktop
+    harbour-sailTrivia.desktop \
+    qml/pages/StatisticsPage.qml \
+    qml/pages/AboutPage.qml
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 

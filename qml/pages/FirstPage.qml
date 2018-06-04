@@ -41,6 +41,10 @@ Page {
         PullDownMenu {
             busy: categoriesLoaded
             MenuItem {
+                text: qsTr("About")
+                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
+            }
+            MenuItem {
                 text: qsTr("Statistics")
                 onClicked: pageStack.push(Qt.resolvedUrl("StatisticsPage.qml"))
             }
