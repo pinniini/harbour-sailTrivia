@@ -1,6 +1,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
+import fi.pinniini.sailTrivia 1.0
+
 Page {
     id: page
 
@@ -13,7 +15,6 @@ Page {
         req.onreadystatechange = function() {
             if (req.readyState === 4 && req.status === 200) {
                 var json = JSON.parse(req.responseText);
-                console.log(json.trivia_categories[0].name);
 
                 // Add categories to model.
                 var count = json.trivia_categories.length;
@@ -24,6 +25,9 @@ Page {
                 }
 
                 categoriesLoaded = true;
+
+                // Test dataloader.
+                dataLoader.loadCategories();
             }
         };
         req.open("GET", "https://opentdb.com/api_category.php", true);
@@ -32,6 +36,10 @@ Page {
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
+
+    DataLoader {
+        id: dataLoader
+    }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
     SilicaFlickable {

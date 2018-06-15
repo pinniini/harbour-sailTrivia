@@ -9,12 +9,17 @@
 #   - icon definition filename in desktop file must be changed
 #   - translation filenames have to be changed
 
+# Application version.
+VERSION = 0.0.4
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
 # The name of your application
 TARGET = harbour-sailTrivia
 
 CONFIG += sailfishapp
 
-SOURCES += src/harbour-sailTrivia.cpp
+SOURCES += src/harbour-sailTrivia.cpp \
+    src/dataloader.cpp
 
 DISTFILES += qml/harbour-sailTrivia.qml \
     qml/cover/CoverPage.qml \
@@ -40,3 +45,6 @@ CONFIG += sailfishapp_i18n
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
 TRANSLATIONS += translations/harbour-sailTrivia-de.ts
+
+HEADERS += \
+    src/dataloader.h
