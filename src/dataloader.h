@@ -14,12 +14,25 @@ public:
     ~DataLoader();
 
     /*!
-     * Stuff.
+     *
      */
     Q_INVOKABLE void loadCategories();
 
+    Q_INVOKABLE void loadQuestions(int questionCount, int categoryId, string difficulty);
+
 signals:
-    void categoriesLoaded();
+
+    /*!
+     * \brief Signal to tell when the categories json is loaded.
+     * \param Categories data as a json string.
+     */
+    void categoriesLoaded(const QString& categoriesData);
+
+    /*!
+     * \brief Signal to tell when the questions json is loaded.
+     * \param Questions data as a json string.
+     */
+    void questionsLoaded(const QString& questionData);
 
 public slots:
 

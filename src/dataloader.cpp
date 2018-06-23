@@ -1,4 +1,5 @@
 #include <QNetworkRequest>
+#include <QJsonDocument>
 
 #include "dataloader.h"
 
@@ -32,4 +33,6 @@ void DataLoader::loadCategories()
 void DataLoader::categoriesFinished()
 {
     qDebug() << "Categories loaded...";
+    //QJsonDocument doc = QJsonDocument::fromBinaryData(_reply->readAll());
+    emit categoriesLoaded(QString::fromLatin1(_reply->readAll()));
 }

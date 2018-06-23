@@ -39,6 +39,11 @@ Page {
 
     DataLoader {
         id: dataLoader
+
+        onCategoriesLoaded: {
+            console.log("DataLoader: categories loaded...");
+            console.log(categoriesData);
+        }
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
