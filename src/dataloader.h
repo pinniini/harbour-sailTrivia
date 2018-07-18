@@ -6,6 +6,8 @@
 #include <QUrl>
 #include <QNetworkReply>
 
+#include "difficulty.h"
+
 class DataLoader : public QObject
 {
     Q_OBJECT
@@ -18,7 +20,17 @@ public:
      */
     Q_INVOKABLE void loadCategories();
 
-    Q_INVOKABLE void loadQuestions(int questionCount, int categoryId, string difficulty);
+    /*!
+     *
+     */
+    Q_INVOKABLE void loadQuestions(int questionCount, int categoryId, int difficulty);
+
+    /*!
+     *
+     */
+    Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
+
+    bool loading() const;
 
 signals:
 
@@ -34,15 +46,52 @@ signals:
      */
     void questionsLoaded(const QString& questionData);
 
+    /*!
+     * \brief Signal to tell that the given parameters for questions query were invalid.
+     * \param Error message telling which parameter(s) were invalid.
+     */
+    void invalidParameters(const QString& errorMessage);
+
+    /*!
+     * \brief Signal to tell when dataloader loading status changes.
+     */
+    void loadingChanged();
+
+    /*!
+     * \brief dataLodingErrorOccured
+     * \param errorMessage
+     */
+    void dataLodingErrorOccured(const QString& errorMessage);
+
 public slots:
 
 private slots:
     void categoriesFinished();
+    void questionsFinished();
+    void errorLoadingData(QNetworkReply::NetworkError error);
 
 private:
     QNetworkAccessManager* _manager;
     QUrl _categoriesUrl;
+    QString _questionsBaseUrl;
     QNetworkReply* _reply;
+    bool _loading;
+
+    /*!
+     * \brief setLoadingStatus
+     * \param status
+     */
+    void setLoadingStatus(const bool status);
+
+    /*!
+     * \brief cleanCategoriesRequest
+     */
+    void cleanCategoriesRequest();
+
+    /*!
+     * \brief cleanQuestionsRequest
+     */
+    void cleanQuestionsRequest();
 };
 
 #endif // DATALOADER_H

@@ -19,7 +19,8 @@ TARGET = harbour-sailTrivia
 CONFIG += sailfishapp
 
 SOURCES += src/harbour-sailTrivia.cpp \
-    src/dataloader.cpp
+    src/dataloader.cpp \
+    src/categorymodel.cpp
 
 DISTFILES += qml/harbour-sailTrivia.qml \
     qml/cover/CoverPage.qml \
@@ -47,4 +48,6 @@ CONFIG += sailfishapp_i18n
 TRANSLATIONS += translations/harbour-sailTrivia-de.ts
 
 HEADERS += \
-    src/dataloader.h
+    src/dataloader.h \
+    src/difficulty.h \
+    src/categorymodel.h

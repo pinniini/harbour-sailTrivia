@@ -8,30 +8,10 @@ Page {
 
     property int currentCategoryId: -1
     property bool categoriesLoaded: false
-    property string currentDifficulty: ""
+    property int currentDifficulty: Difficulty.All
 
     Component.onCompleted: {
-        var req = new XMLHttpRequest();
-        req.onreadystatechange = function() {
-            if (req.readyState === 4 && req.status === 200) {
-                var json = JSON.parse(req.responseText);
-
-                // Add categories to model.
-                var count = json.trivia_categories.length;
-                for(var i = 0; i < count; ++i) {
-                    var cat = json.trivia_categories[i];
-                    var item = { itemId: cat.id, itemName: cat.name };
-                    categoryModel.append(item)
-                }
-
-                categoriesLoaded = true;
-
-                // Test dataloader.
-                dataLoader.loadCategories();
-            }
-        };
-        req.open("GET", "https://opentdb.com/api_category.php", true);
-        req.send();
+        dataLoader.loadCategories();
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -40,9 +20,31 @@ Page {
     DataLoader {
         id: dataLoader
 
+        // Handle categories load.
         onCategoriesLoaded: {
-            console.log("DataLoader: categories loaded...");
-            console.log(categoriesData);
+            // This is here just for testing, model should be filled from c++ side.
+            var json = JSON.parse(categoriesData);
+
+            // Add categories to model.
+            var count = json.trivia_categories.length;
+            for(var i = 0; i < count; ++i) {
+                var cat = json.trivia_categories[i];
+                var item = { itemId: cat.id, itemName: cat.name };
+                categoryModel.append(item)
+            }
+
+            page.categoriesLoaded = true;
+        }
+
+        // Handle questions load.
+        onQuestionsLoaded: {
+            var json = JSON.parse(questionData);
+            var count = json.results.length;
+        }
+
+        // Handle invalid parameters.
+        onInvalidParameters: {
+            console.log(errorMessage);
         }
     }
 
@@ -52,7 +54,7 @@ Page {
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
-            busy: categoriesLoaded
+            busy: dataLoader.loading
             MenuItem {
                 text: qsTr("About")
                 onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
@@ -118,19 +120,19 @@ Page {
                 menu: ContextMenu {
                     MenuItem {
                         text: qsTr("Any")
-                        onClicked: currentDifficulty = ""
+                        onClicked: currentDifficulty = Difficulty.All
                     }
                     MenuItem {
                         text: qsTr("Easy")
-                        onClicked: currentDifficulty = "easy"
+                        onClicked: currentDifficulty = Difficulty.Easy
                     }
                     MenuItem {
                         text: qsTr("Medium")
-                        onClicked: currentDifficulty = "medium"
+                        onClicked: currentDifficulty = Difficulty.Medium
                     }
                     MenuItem {
                         text: qsTr("Hard")
-                        onClicked: currentDifficulty = "hard"
+                        onClicked: currentDifficulty = Difficulty.Hard
                     }
                 }
             }
@@ -140,8 +142,12 @@ Page {
                 id: startButton
                 text: qsTr("Start")
                 anchors.horizontalCenter: parent.horizontalCenter
+                enabled: !dataLoader.loading
 
-                onClicked: console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
+                onClicked: {
+                    console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
+                    dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
+                }
             }
         }
     }

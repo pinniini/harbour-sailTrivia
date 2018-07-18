@@ -5,6 +5,7 @@
 #include <sailfishapp.h>
 
 #include "dataloader.h"
+#include "difficulty.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,8 @@ int main(int argc, char *argv[])
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 
     qmlRegisterType<DataLoader>("fi.pinniini.sailTrivia", 1, 0, "DataLoader");
+    //qmlRegisterType<Difficulty>("fi.pinniini.sailTrivia", 1, 0, "Difficulty");
+    qmlRegisterUncreatableType<Difficulty>("fi.pinniini.sailTrivia", 1, 0, "Difficulty", "I'm here just for the enums. You cannot make me be an object.");
 
     view->rootContext()->setContextProperty("appVersion", APP_VERSION);
     view->setSource(SailfishApp::pathToMainQml());
