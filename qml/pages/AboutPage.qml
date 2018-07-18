@@ -17,7 +17,7 @@ Page {
         Column {
             id: contentColumn
 
-            width: page.width
+            width: aboutPage.width
             spacing: Theme.paddingLarge
             PageHeader {
                 title: qsTr("About")

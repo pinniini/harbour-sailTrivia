@@ -4,8 +4,20 @@
 
 #include <sailfishapp.h>
 
+#include "dataloader.h"
+
 int main(int argc, char *argv[])
 {
+    QScopedPointer<QGuiApplication> a(SailfishApp::application(argc, argv));
+    QScopedPointer<QQuickView> view(SailfishApp::createView());
+
+    qmlRegisterType<DataLoader>("fi.pinniini.sailTrivia", 1, 0, "DataLoader");
+
+    view->rootContext()->setContextProperty("appVersion", APP_VERSION);
+    view->setSource(SailfishApp::pathToMainQml());
+    view->show();
+    return a->exec();
+
     // SailfishApp::main() will display "qml/harbour-sailTrivia.qml", if you need more
     // control over initialization, you can use:
     //
@@ -16,5 +28,5 @@ int main(int argc, char *argv[])
     //
     // To display the view, call "show()" (will show fullscreen on device).
 
-    return SailfishApp::main(argc, argv);
+    //    return SailfishApp::main(argc, argv);
 }

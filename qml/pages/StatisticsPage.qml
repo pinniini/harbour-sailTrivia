@@ -24,7 +24,7 @@ Page {
         Column {
             id: contentColumn
 
-            width: page.width
+            width: statisticsPage.width
             spacing: Theme.paddingLarge
             PageHeader {
                 title: qsTr("Statistics")
