@@ -88,8 +88,6 @@ bool CategoryModel::fillModel(const QString &json)
     QJsonDocument doc(QJsonDocument::fromJson(json.toLatin1()));
     readJson(doc.object());
 
-    //endInsertRows();
-
     return true;
 }
 
@@ -116,7 +114,7 @@ void CategoryModel::readJson(const QJsonObject &object)
             readCategory(cat);
         }
 
-        qDebug() << "CategoryModel size: " << _categories->length();
+        qDebug() << "CategoryModel size: " << _categories->size();
 
         endInsertRows();
     }

@@ -39,8 +39,8 @@ Page {
 
         // Handle questions load.
         onQuestionsLoaded: {
-            var json = JSON.parse(questionData);
-            var count = json.results.length;
+            questionModel.fillModel(questionData);
+
         }
 
         // Handle invalid parameters.
@@ -154,6 +154,21 @@ Page {
                     dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
                 }
             }
+
+            Repeater {
+                model: questionModel
+                ComboBox {
+                    label: question
+                    menu: ContextMenu {
+                        Repeater {
+                            model: answers
+                            MenuItem {
+                                text: "jou"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -168,5 +183,9 @@ Page {
 
     CategoryModel {
         id: customModel
+    }
+
+    QuestionModel {
+        id: questionModel
     }
 }
