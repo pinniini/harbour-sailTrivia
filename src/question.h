@@ -47,7 +47,7 @@ public:
      * \brief incorrectAnswers
      * \return
      */
-    QVector<QString> answers() const;
+    QVariantList answers() const;
 
 private:
     QString _category;
@@ -55,7 +55,7 @@ private:
     QString _difficulty;
     QString _question;
     QString _correctAnswer;
-    QVector<QString> _answers;
+    QVariantList _answers;
 };
 
 #endif // QUESTION_H

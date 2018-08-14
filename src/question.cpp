@@ -1,4 +1,5 @@
 #include "question.h"
+#include <QVariant>
 
 Question::Question()
 {
@@ -6,9 +7,12 @@ Question::Question()
 }
 
 Question::Question(QString category, QString type, QString difficulty, QString question, QString correctAnswer, QVector<QString> answers)
-    : _category(category), _type(type), _difficulty(difficulty), _question(question), _correctAnswer(correctAnswer), _answers(answers)
+    : _category(category), _type(type), _difficulty(difficulty), _question(question), _correctAnswer(correctAnswer)
 {
-
+    foreach (QString answer, answers)
+    {
+        _answers.append(QVariant::fromValue(answer));
+    }
 }
 
 Question::~Question()
@@ -41,7 +45,7 @@ QString Question::correctAnswer() const
     return _correctAnswer;
 }
 
-QVector<QString> Question::answers() const
+QVariantList Question::answers() const
 {
     return _answers;
 }

@@ -22,25 +22,13 @@ Page {
 
         // Handle categories load.
         onCategoriesLoaded: {
-            // This is here just for testing, model should be filled from c++ side.
-//            var json = JSON.parse(categoriesData);
-
-//            // Add categories to model.
-//            var count = json.trivia_categories.length;
-//            for(var i = 0; i < count; ++i) {
-//                var cat = json.trivia_categories[i];
-//                var item = { itemId: cat.id, itemName: cat.name };
-//                categoryModel.append(item)
-//            }
-
-            customModel.fillModel(categoriesData);
+            categoriesModel.fillModel(categoriesData);
             page.categoriesLoaded = true;
         }
 
         // Handle questions load.
         onQuestionsLoaded: {
             questionModel.fillModel(questionData);
-
         }
 
         // Handle invalid parameters.
@@ -103,12 +91,8 @@ Page {
                 enabled: categoriesLoaded
 
                 menu: ContextMenu {
-//                    Repeater {
-//                        model: categoryModel
-//                        MenuItem { text: itemName; onClicked: currentCategoryId = itemId}
-//                    }
                     Repeater {
-                        model: customModel
+                        model: categoriesModel
                         MenuItem { text: name; onClicked: currentCategoryId = id}
                     }
                 }
@@ -155,34 +139,26 @@ Page {
                 }
             }
 
-            Repeater {
-                model: questionModel
-                ComboBox {
-                    label: question
-                    menu: ContextMenu {
-                        Repeater {
-                            model: answers
-                            MenuItem {
-                                text: "jou"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    ListModel {
-        id: categoryModel
-
-        ListElement {
-            itemId: -1
-            itemName: "All"
+            // This is here just to remind how the QuestionModel could be used.
+//            Repeater {
+//                model: questionModel
+//                ComboBox {
+//                    label: question
+//                    menu: ContextMenu {
+//                        Repeater {
+//                            model: answers
+//                            MenuItem {
+//                                text: modelData
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
     CategoryModel {
-        id: customModel
+        id: categoriesModel
     }
 
     QuestionModel {
