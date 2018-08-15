@@ -1,32 +1,29 @@
-#ifndef CATEGORYMODEL_H
-#define CATEGORYMODEL_H
+#ifndef QUESTIONMODEL_H
+#define QUESTIONMODEL_H
 
 #include <QObject>
 #include <QAbstractListModel>
 #include <QJsonObject>
 
-#include "category.h"
+#include "question.h"
 
-class CategoryModel : public QAbstractListModel
+class QuestionModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    /*!
-     * \brief The CategoryRoles enum
-     */
-    enum CategoryRoles
+    enum QuestionRoles
     {
-        IdRole = Qt::UserRole + 1,
-        NameRole = Qt::UserRole + 2
+        CategoryRole = Qt::UserRole + 1,
+        TypeRole = Qt::UserRole + 2,
+        DifficultyRole = Qt::UserRole + 3,
+        QuestionRole = Qt::UserRole + 4,
+        CorrectRole = Qt::UserRole + 5,
+        AnswersRole = Qt::UserRole + 6
     };
 
-    /*!
-     * \brief CategoryModel
-     * \param parent
-     */
-    explicit CategoryModel(QObject *parent = 0);
+    explicit QuestionModel(QObject *parent = 0);
 
-    ~CategoryModel();
+    ~QuestionModel();
 
     /*!
      * \brief rowCount
@@ -52,10 +49,10 @@ public:
     Q_INVOKABLE bool fillModel(const QString &json);
 
 private:
-    QVector<Category> *_categories;
+    QVector<Question> *_questions;
 
     void readJson(const QJsonObject &object);
-    void readCategory(const QJsonObject &json);
+    void readQuestion(const QJsonObject &json);
 };
 
-#endif // CATEGORYMODEL_H
+#endif // QUESTIONMODEL_H

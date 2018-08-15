@@ -10,8 +10,10 @@
 #   - translation filenames have to be changed
 
 # Application version.
-VERSION = 0.0.4
+VERSION = 0.1.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
+QT += network
 
 # The name of your application
 TARGET = harbour-sailTrivia
@@ -20,7 +22,10 @@ CONFIG += sailfishapp
 
 SOURCES += src/harbour-sailTrivia.cpp \
     src/dataloader.cpp \
-    src/categorymodel.cpp
+    src/categorymodel.cpp \
+    src/category.cpp \
+    src/question.cpp \
+    src/questionmodel.cpp
 
 DISTFILES += qml/harbour-sailTrivia.qml \
     qml/cover/CoverPage.qml \
@@ -50,4 +55,8 @@ TRANSLATIONS += translations/harbour-sailTrivia-de.ts
 HEADERS += \
     src/dataloader.h \
     src/difficulty.h \
-    src/categorymodel.h
+    src/categorymodel.h \
+    src/category.h \
+    src/question.h \
+    src/questionmodel.h \
+    src/jsonconstants.h

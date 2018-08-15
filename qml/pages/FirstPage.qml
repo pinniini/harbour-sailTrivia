@@ -22,24 +22,13 @@ Page {
 
         // Handle categories load.
         onCategoriesLoaded: {
-            // This is here just for testing, model should be filled from c++ side.
-            var json = JSON.parse(categoriesData);
-
-            // Add categories to model.
-            var count = json.trivia_categories.length;
-            for(var i = 0; i < count; ++i) {
-                var cat = json.trivia_categories[i];
-                var item = { itemId: cat.id, itemName: cat.name };
-                categoryModel.append(item)
-            }
-
+            categoriesModel.fillModel(categoriesData);
             page.categoriesLoaded = true;
         }
 
         // Handle questions load.
         onQuestionsLoaded: {
-            var json = JSON.parse(questionData);
-            var count = json.results.length;
+            questionModel.fillModel(questionData);
         }
 
         // Handle invalid parameters.
@@ -103,8 +92,8 @@ Page {
 
                 menu: ContextMenu {
                     Repeater {
-                        model: categoryModel
-                        MenuItem { text: itemName; onClicked: currentCategoryId = itemId}
+                        model: categoriesModel
+                        MenuItem { text: name; onClicked: currentCategoryId = id}
                     }
                 }
             }
@@ -149,15 +138,30 @@ Page {
                     dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
                 }
             }
+
+            // This is here just to remind how the QuestionModel could be used.
+//            Repeater {
+//                model: questionModel
+//                ComboBox {
+//                    label: question
+//                    menu: ContextMenu {
+//                        Repeater {
+//                            model: answers
+//                            MenuItem {
+//                                text: modelData
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
-    ListModel {
-        id: categoryModel
+    CategoryModel {
+        id: categoriesModel
+    }
 
-        ListElement {
-            itemId: -1
-            itemName: "All"
-        }
+    QuestionModel {
+        id: questionModel
     }
 }
