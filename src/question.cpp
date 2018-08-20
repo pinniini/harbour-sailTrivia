@@ -1,7 +1,7 @@
-#include "question.h"
 #include <QVariant>
+#include "question.h"
 
-Question::Question()
+Question::Question(QObject* parent) : QObject(parent)
 {
 
 }

@@ -1,6 +1,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QDebug>
+#include <QtQml>
 
 #include <algorithm>
 
@@ -15,7 +16,7 @@ using namespace JsonConstants;
  */
 QuestionModel::QuestionModel(QObject *parent) : QAbstractListModel(parent)
 {
-    _questions = new QVector<Question>();
+    _questions = new QVector<Question*>();
 }
 
 /*!
@@ -23,6 +24,12 @@ QuestionModel::QuestionModel(QObject *parent) : QAbstractListModel(parent)
  */
 QuestionModel::~QuestionModel()
 {
+    for(int i = 0; i < _questions->length(); ++i)
+    {
+        delete _questions->at(i);
+        (*_questions)[i] = 0;
+    }
+
     _questions->clear();
     delete _questions;
     _questions = 0;
@@ -60,17 +67,17 @@ QVariant QuestionModel::data(const QModelIndex &index, int role) const
     {
         switch (role) {
         case CategoryRole:
-            return QVariant(_questions->at(index.row()).category());
+            return QVariant(_questions->at(index.row())->category());
         case TypeRole:
-            return QVariant(_questions->at(index.row()).type());
+            return QVariant(_questions->at(index.row())->type());
         case DifficultyRole:
-            return QVariant(_questions->at(index.row()).difficulty());
+            return QVariant(_questions->at(index.row())->difficulty());
         case QuestionRole:
-            return QVariant(_questions->at(index.row()).question());
+            return QVariant(_questions->at(index.row())->question());
         case CorrectRole:
-            return QVariant(_questions->at(index.row()).correctAnswer());
+            return QVariant(_questions->at(index.row())->correctAnswer());
         case AnswersRole:
-            return QVariant::fromValue(_questions->at(index.row()).answers());
+            return QVariant::fromValue(_questions->at(index.row())->answers());
         default:
             return QVariant();
         }
@@ -97,6 +104,19 @@ QHash<int, QByteArray> QuestionModel::roleNames() const
     return roles;
 }
 
+Question* QuestionModel::get(int index) const
+{
+    qDebug() << "QuestionModel::get(index) - index = " << index;
+    qDebug() << "QuestionModel::get(index) - questions count: " << _questions->length();
+
+    if (_questions == 0 || index < 0 || index > _questions->length() - 1)
+    {
+        return 0;
+    }
+
+    return _questions->at(index);
+}
+
 /*!
  * \brief QuestionModel::fillModel
  * \param json
@@ -106,6 +126,13 @@ bool QuestionModel::fillModel(const QString &json)
 {
     // Clear old data.
     beginResetModel();
+
+    for (int i = 0; i < _questions->length(); ++i)
+    {
+        delete _questions->at(i);
+        (*_questions)[i] = 0;
+    }
+
     _questions->clear();
     endResetModel();
 
@@ -189,6 +216,12 @@ void QuestionModel::readQuestion(const QJsonObject &json)
         // Sort the answers.
         std::sort(answers.begin(), answers.end());
 
-        _questions->push_back(Question(category, type, difficulty, quest, correct, answers));
+        Question *que = new Question(category, type, difficulty, quest, correct, answers);
+
+        // This is necessary, so that the js engine won't garbage collect the object after using get-method.
+        // Because the ownership moves to the js engine if we return the object from here to there.
+        QQmlEngine::setObjectOwnership(que, QQmlEngine::CppOwnership);
+
+        _questions->push_back(que);
     }
 }

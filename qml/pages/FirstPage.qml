@@ -29,6 +29,7 @@ Page {
         // Handle questions load.
         onQuestionsLoaded: {
             questionModel.fillModel(questionData);
+            onClicked: pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
         }
 
         // Handle invalid parameters.

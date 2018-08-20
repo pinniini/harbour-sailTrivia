@@ -38,7 +38,8 @@ DISTFILES += qml/harbour-sailTrivia.qml \
     translations/*.ts \
     harbour-sailTrivia.desktop \
     qml/pages/StatisticsPage.qml \
-    qml/pages/AboutPage.qml
+    qml/pages/AboutPage.qml \
+    qml/pages/QuestionPage.qml
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 

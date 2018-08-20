@@ -103,6 +103,13 @@
     </message>
 </context>
 <context>
+    <name>QuestionPage</name>
+    <message>
+        <source>End game</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SecondPage</name>
     <message>
         <source>Nested Page</source>
