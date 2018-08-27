@@ -56,6 +56,25 @@
     </message>
 </context>
 <context>
+    <name>EndGamePage</name>
+    <message>
+        <source>Game over</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Question count:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Correct answers:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incorrect answers:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FirstPage</name>
     <message>
         <source>Statistics</source>

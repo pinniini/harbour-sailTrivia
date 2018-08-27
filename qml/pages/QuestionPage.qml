@@ -41,6 +41,10 @@ Page {
                 text: qsTr("End game")
                 onClicked: console.log("We should end the game...")
             }
+            MenuItem {
+                text: qsTr("Skip question")
+                onClicked: console.log("We should skip the question...");
+            }
         }
 
         // Tell SilicaFlickable the height of its content.
@@ -51,7 +55,8 @@ Page {
         Column {
             id: column
 
-            width: questionPage.width
+            width: questionPage.width - Theme.paddingLarge - Theme.paddingLarge
+            anchors.horizontalCenter: parent.horizontalCenter
             spacing: Theme.paddingLarge
             PageHeader {
                 title: qsTr("Question " + questionNumber + "/" + questionCount)
@@ -125,22 +130,24 @@ Page {
 
     Timer {
         id: questionChangeTimer
-        interval: 2000
+        interval: 1000
         running: false
         repeat: false
         triggeredOnStart: false
 
         onTriggered: {
+            console.log("Change question triggered...");
             // Still questions left.
             if (questionNumber != questionCount)
             {
-                pageStack.replace(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": questionNumber + 1, "questionCount": questionCount, "questionModel": questionModel});
+                pageStack.replace(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": questionNumber + 1, "questionCount": questionCount, "questionModel": questionModel, "correctCount": correctCount, "incorrectCount": incorrectCount});
             }
             else // End game.
             {
 //                backNavigation = true;
                 endGame(correctCount, incorrectCount);
-                pageStack.pop();
+                //pageStack.pop();
+                pageStack.replace(Qt.resolvedUrl("EndGamePage.qml"), {"totalCount": questionCount, "correctCount": correctCount, "incorrectCount": incorrectCount});
             }
         }
     }
