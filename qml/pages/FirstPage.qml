@@ -10,6 +10,9 @@ Page {
     property bool categoriesLoaded: false
     property int currentDifficulty: Difficulty.All
 
+    // test
+    property bool toggleCover: false
+
     Component.onCompleted: {
         dataLoader.loadCategories();
     }
@@ -72,8 +75,8 @@ Page {
             // Choose question count.
             Slider {
                 id: questionCountSlider
-                anchors.left: parent.left
-                anchors.right: parent.right
+                //anchors.left: parent.left
+                //anchors.right: parent.right
                 width: parent.width// - Theme.horizontalPageMargin
                 minimumValue: 1
                 maximumValue: 50
@@ -85,8 +88,8 @@ Page {
             // Choose category.
             ComboBox {
                 id: categoryCombo
-                anchors.left: parent.left
-                anchors.right: parent.right
+//                anchors.left: parent.left
+//                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Category:")
                 enabled: categoriesLoaded
@@ -102,8 +105,8 @@ Page {
             // Choose difficulty.
             ComboBox {
                 id: difficultyCombo
-                anchors.left: parent.left
-                anchors.right: parent.right
+//                anchors.left: parent.left
+//                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Difficulty:")
 

@@ -12,10 +12,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>TODO: basic about text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Version </source>
         <translation type="unfinished"></translation>
     </message>
@@ -47,12 +43,9 @@
         <source>Ideas/Issues/Want to help</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>CoverPage</name>
     <message>
-        <source>My Cover</source>
-        <translation>Mein Cover</translation>
+        <source>This is a simple trivia-game for Sailfish OS. The game uses Open Trivia Database as the source for the questions.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -71,6 +64,10 @@
     </message>
     <message>
         <source>Incorrect answers:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Skipped answers:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -125,6 +122,10 @@
     <name>QuestionPage</name>
     <message>
         <source>End game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Skip question</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

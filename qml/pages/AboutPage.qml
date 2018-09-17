@@ -28,9 +28,10 @@ Page {
             }
 
             Label {
-                text: qsTr("TODO: basic about text")
+                text: qsTr("This is a simple trivia-game for Sailfish OS. The game uses Open Trivia Database as the source for the questions.")
                 wrapMode: Text.Wrap
                 width: parent.width - Theme.paddingMedium
+                textFormat: Text.RichText
                 x: Theme.paddingMedium
             }
 
@@ -55,12 +56,12 @@ Page {
             }
 
             Label {
-                text: "BSD"
+                text: "MIT"
                 font.underline: true
                 x: Theme.paddingMedium
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: Qt.openUrlExternally("http://choosealicense.com/licenses/bsd-3-clause/")
+                    onClicked: Qt.openUrlExternally("https://opensource.org/licenses/MIT")
                 }
             }
 

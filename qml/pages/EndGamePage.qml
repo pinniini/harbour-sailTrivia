@@ -4,6 +4,7 @@ import Sailfish.Silica 1.0
 Page {
     id: endGamePage
     clip: true
+    allowedOrientations: Orientation.All
 
     property int totalCount: 10
     property int correctCount: 1
@@ -41,6 +42,11 @@ Page {
             DetailItem {
                 label: qsTr("Incorrect answers:")
                 value: incorrectCount
+            }
+
+            DetailItem {
+                label: qsTr("Skipped answers:")
+                value: skippedCount
             }
         }
     }

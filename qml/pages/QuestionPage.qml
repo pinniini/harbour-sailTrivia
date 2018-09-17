@@ -6,6 +6,8 @@ Page {
     clip: true
     backNavigation: false
 
+    allowedOrientations: Orientation.All
+
     property int questionNumber: 3
     property int questionCount: 42
     property var questionModel
@@ -16,11 +18,12 @@ Page {
     property var answers
     property int correctCount: 0
     property int incorrectCount: 0
+    property int skippedCount: 0
     property bool answered: false
 
-    signal answerCorrect()
-    signal answerIncorrect()
-    signal endGame(int correctCount, int incorrectCount)
+//    signal answerCorrect()
+//    signal answerIncorrect()
+//    signal endGame(int correctCount, int incorrectCount)
 
     Component.onCompleted: {
         var que = questionModel.get(questionNumber - 1);
@@ -39,11 +42,18 @@ Page {
         PullDownMenu {
             MenuItem {
                 text: qsTr("End game")
-                onClicked: console.log("We should end the game...")
+                onClicked: {
+                    console.log("We should end the game...");
+                    endGame();
+                }
             }
             MenuItem {
                 text: qsTr("Skip question")
-                onClicked: console.log("We should skip the question...");
+                onClicked: {
+                    console.log("We should skip the question...");
+                    ++skippedCount;
+                    nextQuestion();
+                }
             }
         }
 
@@ -88,40 +98,59 @@ Page {
 
             Repeater {
                 model: answers //questionModel.get(questionNumber - 1).answers
-                Button {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    width: parent.width
-                    text: modelData
 
-                    onClicked: {
-                        if (questionPage.answered === true)
-                        {
-                            return;
+                Rectangle {
+                    anchors.horizontalCenter: column.horizontalCenter
+                    radius: 10
+                    color: questionPage.answered
+                           ? (modelData === questionPage.correctAnswer ? Theme.rgba("#00ff00", Theme.highlightBackgroundOpacity) /*"#F200ff00"*/ : Theme.rgba("#ff0000", Theme.highlightBackgroundOpacity)/*"#F2ff0000"*/)
+                           : Theme.rgba("gray", Theme.highlightBackgroundOpacity) //"#808080F2"
+                    width: column.width - Theme.paddingMedium - Theme.paddingMedium
+                    height: children[0].height + Theme.paddingMedium + Theme.paddingMedium
+
+                    Label {
+                        text: modelData
+                        //anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.top
+                        anchors.topMargin: Theme.paddingMedium
+                        anchors.left: parent.left
+                        anchors.leftMargin: Theme.paddingMedium
+                        wrapMode: Text.Wrap
+                        textFormat: Text.RichText
+                        width: parent.width - Theme.paddingMedium - Theme.paddingMedium
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            if (questionPage.answered === true)
+                            {
+                                return;
+                            }
+
+                            parent.border.width = 4;
+                            questionPage.answered = true;
+
+                            console.log("User answered: " + modelData);
+                            console.log(questionNumber + "/" + questionCount);
+                            console.log(questionModel.rowCount());
+                            console.log(correctAnswer)
+                            console.log(pageStack.depth);
+
+                            // Check answer.
+                            if (modelData === correctAnswer)
+                            {
+                                ++correctCount;
+                                parent.color = "green";
+                            }
+                            else
+                            {
+                                ++incorrectCount;
+                                parent.color = "red";
+                            }
+
+                            questionChangeTimer.start();
                         }
-
-                        questionPage.answered = true;
-
-                        console.log("User answered: " + modelData);
-                        console.log(questionNumber + "/" + questionCount);
-                        console.log(questionModel.rowCount());
-                        console.log(correctAnswer) //questionModel.get(questionNumber - 1).correctAnswer)
-                        console.log(pageStack.depth);
-
-                        if (modelData === correctAnswer) //questionModel.get(questionNumber - 1).correctAnswer)
-                        {
-                            highlightBackgroundColor = color = "green";
-                            ++correctCount;
-                            answerCorrect()
-                        }
-                        else
-                        {
-                            highlightBackgroundColor = color = "red";
-                            ++incorrectCount;
-                            answerIncorrect()
-                        }
-
-                        questionChangeTimer.start();
                     }
                 }
             }
@@ -137,18 +166,24 @@ Page {
 
         onTriggered: {
             console.log("Change question triggered...");
+
             // Still questions left.
             if (questionNumber != questionCount)
             {
-                pageStack.replace(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": questionNumber + 1, "questionCount": questionCount, "questionModel": questionModel, "correctCount": correctCount, "incorrectCount": incorrectCount});
+                nextQuestion();
             }
             else // End game.
             {
-//                backNavigation = true;
-                endGame(correctCount, incorrectCount);
-                //pageStack.pop();
-                pageStack.replace(Qt.resolvedUrl("EndGamePage.qml"), {"totalCount": questionCount, "correctCount": correctCount, "incorrectCount": incorrectCount});
+                endGame();
             }
         }
+    }
+
+    function nextQuestion() {
+        pageStack.replace(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": questionNumber + 1, "questionCount": questionCount, "questionModel": questionModel, "correctCount": correctCount, "incorrectCount": incorrectCount, "skippedCount": skippedCount});
+    }
+
+    function endGame() {
+        pageStack.replace(Qt.resolvedUrl("EndGamePage.qml"), {"totalCount": questionCount, "correctCount": correctCount, "incorrectCount": incorrectCount, "skippedCount": skippedCount});
     }
 }
