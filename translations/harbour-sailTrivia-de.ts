@@ -32,19 +32,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Credits</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>TODO: add credits</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ideas/Issues/Want to help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This is a simple trivia-game for Sailfish OS. The game uses Open Trivia Database as the source for the questions.</source>
+        <source>Found bugs? Got some great improvement ideas? Please report them to github and I am happy to look them through :)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source></source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Questions API</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This is a simple trivia-game for Sailfish OS. The game uses Open Trivia Database as the source for the questions. The questions are only in English and this is a limitation in the database.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -148,6 +152,34 @@
     </message>
     <message>
         <source>Statistics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Games played:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Questions asked:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Correct answers:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incorrect answers:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Skipped questions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Games started:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Games aborted:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

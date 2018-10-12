@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 import fi.pinniini.sailTrivia 1.0
+import "../js/statistics.js" as Stats
 
 Page {
     id: page
@@ -11,9 +12,11 @@ Page {
     property int currentDifficulty: Difficulty.All
 
     // test
-    property bool toggleCover: false
+    property bool dataLoading: false
 
     Component.onCompleted: {
+        Stats.initializeDatabase()
+
         dataLoader.loadCategories();
     }
 
@@ -32,12 +35,17 @@ Page {
         // Handle questions load.
         onQuestionsLoaded: {
             questionModel.fillModel(questionData);
-            onClicked: pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+            dataLoading = false;
+            pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
         }
 
         // Handle invalid parameters.
         onInvalidParameters: {
             console.log(errorMessage);
+        }
+
+        onDataLodingErrorOccured: {
+            console.log(errorMessage)
         }
     }
 
@@ -138,9 +146,16 @@ Page {
                 enabled: !dataLoader.loading
 
                 onClicked: {
+                    dataLoading = true;
                     console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
                     dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
                 }
+            }
+
+            BusyIndicator {
+                size: BusyIndicatorSize.Large
+                running: dataLoading
+                anchors.horizontalCenter: parent.horizontalCenter
             }
 
             // This is here just to remind how the QuestionModel could be used.

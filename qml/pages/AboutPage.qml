@@ -7,6 +7,14 @@ Page {
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
+    property string issuesText: qsTr("Found bugs? Got some great improvement ideas? Please report them to github and I am happy to look them through :)")
+    property string generalAboutText: qsTr("This is a simple trivia-game for Sailfish OS. The game uses Open Trivia Database as the source for the questions. The questions are only in English and this is a limitation in the database.")
+
+    Component.onCompleted: {
+        issueLabel.text = Theme.highlightText(issuesText, "github", Theme.highlightColor)
+        generalAboutLabel.text = Theme.highlightText(generalAboutText, "Open Trivia Database", Theme.highlightColor)
+    }
+
     SilicaFlickable {
         id: aboutFlick
         anchors.fill: parent
@@ -28,10 +36,10 @@ Page {
             }
 
             Label {
-                text: qsTr("This is a simple trivia-game for Sailfish OS. The game uses Open Trivia Database as the source for the questions.")
+                id: generalAboutLabel
                 wrapMode: Text.Wrap
                 width: parent.width - Theme.paddingMedium
-                textFormat: Text.RichText
+                textFormat: Text.AutoText
                 x: Theme.paddingMedium
             }
 
@@ -82,15 +90,19 @@ Page {
             }
 
             SectionHeader {
-                text: qsTr("Credits")
+                text: qsTr("Questions API")
             }
 
             Label {
-                id: swedishTranslationLabel
+                text: "https://opentdb.com/"
+                font.underline: true
                 wrapMode: Text.Wrap
                 width: parent.width - Theme.paddingMedium
                 x: Theme.paddingMedium
-                text: qsTr("TODO: add credits")
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Qt.openUrlExternally("https://opentdb.com/")
+                }
             }
 
             SectionHeader {
@@ -107,18 +119,6 @@ Page {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: Qt.openUrlExternally("https://github.com/pinniini/harbour-sailTrivia/issues")
-                }
-            }
-
-            Label {
-                id: translationsLabel
-                wrapMode: Text.Wrap
-                width: parent.width - Theme.paddingMedium
-                x: Theme.paddingMedium
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: Qt.openUrlExternally("https://www.transifex.com/pinniini/harbour-sailTrivia")
                 }
             }
         }
