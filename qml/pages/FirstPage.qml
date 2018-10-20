@@ -11,13 +11,15 @@ Page {
     property bool categoriesLoaded: false
     property int currentDifficulty: Difficulty.All
 
-    // test
+    // Data loadin
     property bool dataLoading: false
+    property bool categoriesLoading: false
 
     Component.onCompleted: {
         Stats.initializeDatabase()
 
-        dataLoader.loadCategories();
+        // Load categories.
+        loadCategories()
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -30,6 +32,8 @@ Page {
         onCategoriesLoaded: {
             categoriesModel.fillModel(categoriesData);
             page.categoriesLoaded = true;
+            categoriesLoading = false
+            categoryCombo.currentIndex = 0
         }
 
         // Handle questions load.
@@ -42,10 +46,14 @@ Page {
         // Handle invalid parameters.
         onInvalidParameters: {
             console.log(errorMessage);
+            dataLoading = false
+            categoriesLoading = false
         }
 
         onDataLodingErrorOccured: {
             console.log(errorMessage)
+            dataLoading = false
+            categoriesLoading = false
         }
     }
 
@@ -63,6 +71,14 @@ Page {
             MenuItem {
                 text: qsTr("Statistics")
                 onClicked: pageStack.push(Qt.resolvedUrl("StatisticsPage.qml"))
+            }
+            MenuItem {
+                text: qsTr("Reload categories")
+                enabled: !categoriesLoading && !dataLoading
+                onClicked: {
+                    console.log("Reload categories selected...")
+                    loadCategories()
+                }
             }
         }
 
@@ -83,9 +99,7 @@ Page {
             // Choose question count.
             Slider {
                 id: questionCountSlider
-                //anchors.left: parent.left
-                //anchors.right: parent.right
-                width: parent.width// - Theme.horizontalPageMargin
+                width: parent.width
                 minimumValue: 1
                 maximumValue: 50
                 stepSize: 1
@@ -96,8 +110,6 @@ Page {
             // Choose category.
             ComboBox {
                 id: categoryCombo
-//                anchors.left: parent.left
-//                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Category:")
                 enabled: categoriesLoaded
@@ -108,13 +120,17 @@ Page {
                         MenuItem { text: name; onClicked: currentCategoryId = id}
                     }
                 }
+
+                BusyIndicator {
+                    size: BusyIndicatorSize.Small
+                    running: categoriesLoading
+                    anchors.centerIn: parent
+                }
             }
 
             // Choose difficulty.
             ComboBox {
                 id: difficultyCombo
-//                anchors.left: parent.left
-//                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Difficulty:")
 
@@ -157,22 +173,6 @@ Page {
                 running: dataLoading
                 anchors.horizontalCenter: parent.horizontalCenter
             }
-
-            // This is here just to remind how the QuestionModel could be used.
-//            Repeater {
-//                model: questionModel
-//                ComboBox {
-//                    label: question
-//                    menu: ContextMenu {
-//                        Repeater {
-//                            model: answers
-//                            MenuItem {
-//                                text: modelData
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
     }
 
@@ -182,5 +182,13 @@ Page {
 
     QuestionModel {
         id: questionModel
+    }
+
+    // Load categories.
+    function loadCategories() {
+        categoryCombo.currentIndex = -1
+        currentCategoryId = -1
+        categoriesLoading = true
+        dataLoader.loadCategories();
     }
 }
