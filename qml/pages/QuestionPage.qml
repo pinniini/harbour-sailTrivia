@@ -52,7 +52,13 @@ Page {
                 onClicked: {
                     console.log("We should skip the question...");
                     ++skippedCount;
-                    nextQuestion();
+
+                    if (questionNumber === questionCount) {
+                        endGame();
+                    }
+                    else {
+                        nextQuestion();
+                    }
                 }
             }
         }
