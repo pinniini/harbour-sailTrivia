@@ -1,37 +1,98 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
+import fi.pinniini.sailTrivia 1.0
+import "../js/statistics.js" as Stats
+
 Page {
     id: page
 
     property int currentCategoryId: -1
     property bool categoriesLoaded: false
-    property string currentDifficulty: ""
+    property int currentDifficulty: Difficulty.All
+
+    // Data loadin
+    property bool dataLoading: false
+    property bool categoriesLoading: false
 
     Component.onCompleted: {
-        var req = new XMLHttpRequest();
-        req.onreadystatechange = function() {
-            if (req.readyState === 4 && req.status === 200) {
-                var json = JSON.parse(req.responseText);
-                console.log(json.trivia_categories[0].name);
+        Stats.initializeDatabase()
 
-                // Add categories to model.
-                var count = json.trivia_categories.length;
-                for(var i = 0; i < count; ++i) {
-                    var cat = json.trivia_categories[i];
-                    var item = { itemId: cat.id, itemName: cat.name };
-                    categoryModel.append(item)
-                }
-
-                categoriesLoaded = true;
+        // Load current statistics.
+        var statss = Stats.getStatistics()
+        if (statss !== false) {
+            for (var i = 0; i < statss.rows.length; ++i) {
+                var sta = statss.rows[i]
+                statistics.setStat(sta.key, sta.numericValue, sta.textValue)
             }
-        };
-        req.open("GET", "https://opentdb.com/api_category.php", true);
-        req.send();
+        }
+
+        // Load categories.
+        loadCategories()
+    }
+
+    // Closing the app, save the statistics.
+    Component.onDestruction: {
+        console.log("Closing app, save statistics...")
+
+        if (pageStack.currentPage && pageStack.currentPage.hasOwnProperty("objectName") && pageStack.currentPage.objectName == "QuestionPage") {
+            console.log("QuestionPage was open while closing the app...");
+            var skipd = statistics.getStatistic("skippedCount");
+            ++skipd.numericValue;
+        }
+
+        // Save statistics.
+        var sts = statistics.getStatistics();
+        var count = sts.length;
+        for (var i = 0; i < count; ++i) {
+            var stat = sts[i];
+            if (stat) {
+                Stats.upsertStatistic(stat.key, stat.numericValue, stat.numericValue.toString());
+            }
+        }
+
+//        var stat = statistics.getStatistic("gamesStarted")
+//        if (stat) {
+//            Stats.upsertStatistic("gamesStarted", stat.numericValue, stat.numericValue.toString());
+//        }
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
+
+    DataLoader {
+        id: dataLoader
+
+        // Handle categories load.
+        onCategoriesLoaded: {
+            categoriesModel.fillModel(categoriesData);
+            page.categoriesLoaded = true;
+            categoriesLoading = false
+            categoryCombo.currentIndex = 0
+        }
+
+        // Handle questions load.
+        onQuestionsLoaded: {
+            questionModel.fillModel(questionData);
+            dataLoading = false;
+            var gamesStarted = statistics.getStatistic("gamesStarted");
+            ++gamesStarted.numericValue;
+            pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+        }
+
+        // Handle invalid parameters.
+        onInvalidParameters: {
+            console.log(errorMessage);
+            dataLoading = false
+            categoriesLoading = false
+        }
+
+        onDataLodingErrorOccured: {
+            console.log(errorMessage)
+            dataLoading = false
+            categoriesLoading = false
+        }
+    }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
     SilicaFlickable {
@@ -39,7 +100,7 @@ Page {
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
-            busy: categoriesLoaded
+            busy: dataLoader.loading
             MenuItem {
                 text: qsTr("About")
                 onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
@@ -47,6 +108,14 @@ Page {
             MenuItem {
                 text: qsTr("Statistics")
                 onClicked: pageStack.push(Qt.resolvedUrl("StatisticsPage.qml"))
+            }
+            MenuItem {
+                text: qsTr("Reload categories")
+                enabled: !categoriesLoading && !dataLoading
+                onClicked: {
+                    console.log("Reload categories selected...")
+                    loadCategories()
+                }
             }
         }
 
@@ -67,9 +136,7 @@ Page {
             // Choose question count.
             Slider {
                 id: questionCountSlider
-                anchors.left: parent.left
-                anchors.right: parent.right
-                width: parent.width// - Theme.horizontalPageMargin
+                width: parent.width
                 minimumValue: 1
                 maximumValue: 50
                 stepSize: 1
@@ -80,44 +147,46 @@ Page {
             // Choose category.
             ComboBox {
                 id: categoryCombo
-                anchors.left: parent.left
-                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Category:")
                 enabled: categoriesLoaded
 
                 menu: ContextMenu {
                     Repeater {
-                        model: categoryModel
-                        MenuItem { text: itemName; onClicked: currentCategoryId = itemId}
+                        model: categoriesModel
+                        MenuItem { text: name; onClicked: currentCategoryId = id}
                     }
+                }
+
+                BusyIndicator {
+                    size: BusyIndicatorSize.Small
+                    running: categoriesLoading
+                    anchors.centerIn: parent
                 }
             }
 
             // Choose difficulty.
             ComboBox {
                 id: difficultyCombo
-                anchors.left: parent.left
-                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Difficulty:")
 
                 menu: ContextMenu {
                     MenuItem {
                         text: qsTr("Any")
-                        onClicked: currentDifficulty = ""
+                        onClicked: currentDifficulty = Difficulty.All
                     }
                     MenuItem {
                         text: qsTr("Easy")
-                        onClicked: currentDifficulty = "easy"
+                        onClicked: currentDifficulty = Difficulty.Easy
                     }
                     MenuItem {
                         text: qsTr("Medium")
-                        onClicked: currentDifficulty = "medium"
+                        onClicked: currentDifficulty = Difficulty.Medium
                     }
                     MenuItem {
                         text: qsTr("Hard")
-                        onClicked: currentDifficulty = "hard"
+                        onClicked: currentDifficulty = Difficulty.Hard
                     }
                 }
             }
@@ -127,18 +196,36 @@ Page {
                 id: startButton
                 text: qsTr("Start")
                 anchors.horizontalCenter: parent.horizontalCenter
+                enabled: !dataLoader.loading
 
-                onClicked: console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
+                onClicked: {
+                    dataLoading = true;
+                    console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
+                    dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
+                }
+            }
+
+            BusyIndicator {
+                size: BusyIndicatorSize.Large
+                running: dataLoading
+                anchors.horizontalCenter: parent.horizontalCenter
             }
         }
     }
 
-    ListModel {
-        id: categoryModel
+    CategoryModel {
+        id: categoriesModel
+    }
 
-        ListElement {
-            itemId: -1
-            itemName: "All"
-        }
+    QuestionModel {
+        id: questionModel
+    }
+
+    // Load categories.
+    function loadCategories() {
+        categoryCombo.currentIndex = -1
+        currentCategoryId = -1
+        categoriesLoading = true
+        dataLoader.loadCategories();
     }
 }
