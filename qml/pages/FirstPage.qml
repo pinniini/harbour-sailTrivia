@@ -39,6 +39,8 @@ Page {
             console.log("QuestionPage was open while closing the app...");
             var skipd = statistics.getStatistic("skippedCount");
             ++skipd.numericValue;
+            var aborted = statistics.getStatistic("gamesAborted");
+            ++aborted.numericValue;
         }
 
         // Save statistics.
@@ -75,9 +77,12 @@ Page {
         onQuestionsLoaded: {
             questionModel.fillModel(questionData);
             dataLoading = false;
-            var gamesStarted = statistics.getStatistic("gamesStarted");
-            ++gamesStarted.numericValue;
-            pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+
+            if (questionModel.rowCount() > 0) {
+                var gamesStarted = statistics.getStatistic("gamesStarted");
+                ++gamesStarted.numericValue;
+                pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+            }
         }
 
         // Handle invalid parameters.
