@@ -1,4 +1,5 @@
 #include <QNetworkRequest>
+#include <QNetworkConfiguration>
 #include <QJsonDocument>
 
 #include "dataloader.h"
@@ -11,8 +12,15 @@ DataLoader::DataLoader(QObject *parent) : QObject(parent)
 {
     _loading = false;
     _manager = new QNetworkAccessManager(this);
+//    _manager->activeConfiguration().setConnectionTimeOut()
     _categoriesUrl = QUrl("https://opentdb.com/api_category.php");
     _questionsBaseUrl = "https://opentdb.com/api.php?";
+    _timeoutTimer = new QTimer();
+    _timeoutTimer->setInterval(5000); // 5 seconds timeout by default.
+    _timeoutTimer->setSingleShot(true);
+
+    // Connect timeout timer timeout.
+    connect(_timeoutTimer, SIGNAL(timeout()), this, SLOT(downloadTimeout()));
 }
 
 /*!
@@ -20,10 +28,30 @@ DataLoader::DataLoader(QObject *parent) : QObject(parent)
  */
 DataLoader::~DataLoader()
 {
-    if(_manager)
+    if (_reply)
+    {
+        delete _reply;
+        _reply = 0;
+    }
+
+    if (_manager)
     {
         delete _manager;
         _manager = 0;
+    }
+
+    // Delete timer.
+    if (_timeoutTimer)
+    {
+        // Stop the timer if it is still running.
+        if (_timeoutTimer->isActive())
+        {
+            _timeoutTimer->stop();
+        }
+
+        disconnect(_timeoutTimer, SIGNAL(timeout()), this, SLOT(downloadTimeout()));
+        delete _timeoutTimer;
+        _timeoutTimer = 0;
     }
 }
 
@@ -32,6 +60,12 @@ DataLoader::~DataLoader()
  */
 void DataLoader::loadCategories()
 {
+    // Stop timer if it is for some reason still running.
+    if (_timeoutTimer->isActive())
+    {
+        _timeoutTimer->stop();
+    }
+
     // Start loading.
     setLoadingStatus(true);
 
@@ -41,6 +75,9 @@ void DataLoader::loadCategories()
 
     connect(_reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingData(QNetworkReply::NetworkError)));
     connect(_reply, SIGNAL(finished()), this, SLOT(categoriesFinished()));
+
+    // Start the timeout.
+    _timeoutTimer->start();
 }
 
 /*!
@@ -51,6 +88,12 @@ void DataLoader::loadCategories()
  */
 void DataLoader::loadQuestions(int questionCount, int categoryId, int difficulty)
 {
+    // Stop timer if it is for some reason still running.
+    if (_timeoutTimer->isActive())
+    {
+        _timeoutTimer->stop();
+    }
+
     // Just in case.
     setLoadingStatus(false);
 
@@ -127,6 +170,9 @@ void DataLoader::loadQuestions(int questionCount, int categoryId, int difficulty
 
     connect(_reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingData(QNetworkReply::NetworkError)));
     connect(_reply, SIGNAL(finished()), this, SLOT(questionsFinished()));
+
+    // Start the timeout.
+    _timeoutTimer->start();
 }
 
 /*!
@@ -147,6 +193,12 @@ bool DataLoader::loading() const
  */
 void DataLoader::categoriesFinished()
 {
+    // Stop the timer.
+    if (_timeoutTimer && _timeoutTimer->isActive())
+    {
+        _timeoutTimer->stop();
+    }
+
     // Loading done.
     setLoadingStatus(false);
 
@@ -177,6 +229,12 @@ void DataLoader::categoriesFinished()
  */
 void DataLoader::questionsFinished()
 {
+    // Stop the timer.
+    if (_timeoutTimer && _timeoutTimer->isActive())
+    {
+        _timeoutTimer->stop();
+    }
+
     // Questions loading done.
     setLoadingStatus(false);
 
@@ -208,8 +266,21 @@ void DataLoader::questionsFinished()
 void DataLoader::errorLoadingData(QNetworkReply::NetworkError error)
 {
     Q_UNUSED(error);
-   QString errMsg = _reply->errorString();
-   emit dataLodingErrorOccured(errMsg);
+    QString errMsg = _reply->errorString();
+    emit dataLodingErrorOccured(errMsg);
+}
+
+/*!
+ * \brief DataLoader::downloadTimeout
+ */
+void DataLoader::downloadTimeout()
+{
+    if (!_reply->isFinished())
+    {
+        _reply->abort();
+        QString errMsg = "Timeout occured while loading data.";
+        emit dataLodingErrorOccured(errMsg);
+    }
 }
 
 // ------------

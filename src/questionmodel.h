@@ -46,10 +46,12 @@ public:
      */
     QHash<int, QByteArray> roleNames() const;
 
+    Q_INVOKABLE Question* get(int index) const;
+
     Q_INVOKABLE bool fillModel(const QString &json);
 
 private:
-    QVector<Question> *_questions;
+    QVector<Question*> *_questions;
 
     void readJson(const QJsonObject &object);
     void readQuestion(const QJsonObject &json);

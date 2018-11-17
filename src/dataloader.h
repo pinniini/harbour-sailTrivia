@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkReply>
+#include <QTimer>
 
 #include "difficulty.h"
 
@@ -69,6 +70,7 @@ private slots:
     void categoriesFinished();
     void questionsFinished();
     void errorLoadingData(QNetworkReply::NetworkError error);
+    void downloadTimeout();
 
 private:
     QNetworkAccessManager* _manager;
@@ -76,6 +78,7 @@ private:
     QString _questionsBaseUrl;
     QNetworkReply* _reply;
     bool _loading;
+    QTimer* _timeoutTimer;
 
     /*!
      * \brief setLoadingStatus

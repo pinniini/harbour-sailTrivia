@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 import fi.pinniini.sailTrivia 1.0
+import "../js/statistics.js" as Stats
 
 Page {
     id: page
@@ -10,8 +11,50 @@ Page {
     property bool categoriesLoaded: false
     property int currentDifficulty: Difficulty.All
 
+    // Data loadin
+    property bool dataLoading: false
+    property bool categoriesLoading: false
+
     Component.onCompleted: {
-        dataLoader.loadCategories();
+        Stats.initializeDatabase()
+
+        // Load current statistics.
+        var statss = Stats.getStatistics()
+        if (statss !== false) {
+            for (var i = 0; i < statss.rows.length; ++i) {
+                var sta = statss.rows[i]
+                statistics.setStat(sta.key, sta.numericValue, sta.textValue)
+            }
+        }
+
+        // Load categories.
+        loadCategories()
+    }
+
+    // Closing the app, save the statistics.
+    Component.onDestruction: {
+        console.log("Closing app, save statistics...")
+
+        if (pageStack.currentPage && pageStack.currentPage.hasOwnProperty("objectName") && pageStack.currentPage.objectName == "QuestionPage") {
+            console.log("QuestionPage was open while closing the app...");
+            var skipd = statistics.getStatistic("skippedCount");
+            ++skipd.numericValue;
+        }
+
+        // Save statistics.
+        var sts = statistics.getStatistics();
+        var count = sts.length;
+        for (var i = 0; i < count; ++i) {
+            var stat = sts[i];
+            if (stat) {
+                Stats.upsertStatistic(stat.key, stat.numericValue, stat.numericValue.toString());
+            }
+        }
+
+//        var stat = statistics.getStatistic("gamesStarted")
+//        if (stat) {
+//            Stats.upsertStatistic("gamesStarted", stat.numericValue, stat.numericValue.toString());
+//        }
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -24,16 +67,30 @@ Page {
         onCategoriesLoaded: {
             categoriesModel.fillModel(categoriesData);
             page.categoriesLoaded = true;
+            categoriesLoading = false
+            categoryCombo.currentIndex = 0
         }
 
         // Handle questions load.
         onQuestionsLoaded: {
             questionModel.fillModel(questionData);
+            dataLoading = false;
+            var gamesStarted = statistics.getStatistic("gamesStarted");
+            ++gamesStarted.numericValue;
+            pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
         }
 
         // Handle invalid parameters.
         onInvalidParameters: {
             console.log(errorMessage);
+            dataLoading = false
+            categoriesLoading = false
+        }
+
+        onDataLodingErrorOccured: {
+            console.log(errorMessage)
+            dataLoading = false
+            categoriesLoading = false
         }
     }
 
@@ -51,6 +108,14 @@ Page {
             MenuItem {
                 text: qsTr("Statistics")
                 onClicked: pageStack.push(Qt.resolvedUrl("StatisticsPage.qml"))
+            }
+            MenuItem {
+                text: qsTr("Reload categories")
+                enabled: !categoriesLoading && !dataLoading
+                onClicked: {
+                    console.log("Reload categories selected...")
+                    loadCategories()
+                }
             }
         }
 
@@ -71,9 +136,7 @@ Page {
             // Choose question count.
             Slider {
                 id: questionCountSlider
-                anchors.left: parent.left
-                anchors.right: parent.right
-                width: parent.width// - Theme.horizontalPageMargin
+                width: parent.width
                 minimumValue: 1
                 maximumValue: 50
                 stepSize: 1
@@ -84,8 +147,6 @@ Page {
             // Choose category.
             ComboBox {
                 id: categoryCombo
-                anchors.left: parent.left
-                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Category:")
                 enabled: categoriesLoaded
@@ -96,13 +157,17 @@ Page {
                         MenuItem { text: name; onClicked: currentCategoryId = id}
                     }
                 }
+
+                BusyIndicator {
+                    size: BusyIndicatorSize.Small
+                    running: categoriesLoading
+                    anchors.centerIn: parent
+                }
             }
 
             // Choose difficulty.
             ComboBox {
                 id: difficultyCombo
-                anchors.left: parent.left
-                anchors.right: parent.right
                 width: parent.width
                 label: qsTr("Difficulty:")
 
@@ -134,26 +199,17 @@ Page {
                 enabled: !dataLoader.loading
 
                 onClicked: {
+                    dataLoading = true;
                     console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
                     dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
                 }
             }
 
-            // This is here just to remind how the QuestionModel could be used.
-//            Repeater {
-//                model: questionModel
-//                ComboBox {
-//                    label: question
-//                    menu: ContextMenu {
-//                        Repeater {
-//                            model: answers
-//                            MenuItem {
-//                                text: modelData
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            BusyIndicator {
+                size: BusyIndicatorSize.Large
+                running: dataLoading
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
         }
     }
 
@@ -163,5 +219,13 @@ Page {
 
     QuestionModel {
         id: questionModel
+    }
+
+    // Load categories.
+    function loadCategories() {
+        categoryCombo.currentIndex = -1
+        currentCategoryId = -1
+        categoriesLoading = true
+        dataLoader.loadCategories();
     }
 }
