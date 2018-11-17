@@ -20,6 +20,15 @@ function initializeDatabase()
                 function(tx) {
                     // Create Statistics-table if it doesn't already exist.
                     tx.executeSql('CREATE TABLE IF NOT EXISTS Statistics(key TEXT, numericValue INT, textValue TEXT)');
+
+                    // Insert statistics.
+                    tx.executeSql('INSERT INTO Statistics(key, numericValue, textValue) SELECT "gamesStarted", 0, "0" WHERE NOT EXISTS(SELECT 1 FROM Statistics WHERE key="gamesStarted")');
+                    tx.executeSql('INSERT INTO Statistics(key, numericValue, textValue) SELECT "gamesPlayed", 0, "0" WHERE NOT EXISTS(SELECT 1 FROM Statistics WHERE key="gamesPlayed")');
+                    tx.executeSql('INSERT INTO Statistics(key, numericValue, textValue) SELECT "gamesAborted", 0, "0" WHERE NOT EXISTS(SELECT 1 FROM Statistics WHERE key="gamesAborted")');
+                    tx.executeSql('INSERT INTO Statistics(key, numericValue, textValue) SELECT "totalCount", 0, "0" WHERE NOT EXISTS(SELECT 1 FROM Statistics WHERE key="totalCount")');
+                    tx.executeSql('INSERT INTO Statistics(key, numericValue, textValue) SELECT "correctCount", 0, "0" WHERE NOT EXISTS(SELECT 1 FROM Statistics WHERE key="correctCount")');
+                    tx.executeSql('INSERT INTO Statistics(key, numericValue, textValue) SELECT "incorrectCount", 0, "0" WHERE NOT EXISTS(SELECT 1 FROM Statistics WHERE key="incorrectCount")');
+                    tx.executeSql('INSERT INTO Statistics(key, numericValue, textValue) SELECT "skippedCount", 0, "0" WHERE NOT EXISTS(SELECT 1 FROM Statistics WHERE key="skippedCount")');
                 }
                 )
     console.log("Database initialized...")
@@ -53,7 +62,7 @@ function getDatabase()
 
 function getStatistics() {
     var db = getDatabase()
-    if(db)
+    if (db)
     {
         var statistics
         db.transaction(

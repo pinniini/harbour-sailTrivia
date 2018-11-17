@@ -25,7 +25,9 @@ SOURCES += src/harbour-sailTrivia.cpp \
     src/categorymodel.cpp \
     src/category.cpp \
     src/question.cpp \
-    src/questionmodel.cpp
+    src/questionmodel.cpp \
+    src/statistics.cpp \
+    src/stat.cpp
 
 DISTFILES += qml/harbour-sailTrivia.qml \
     qml/cover/CoverPage.qml \
@@ -62,4 +64,6 @@ HEADERS += \
     src/category.h \
     src/question.h \
     src/questionmodel.h \
-    src/jsonconstants.h
+    src/jsonconstants.h \
+    src/statistics.h \
+    src/stat.h

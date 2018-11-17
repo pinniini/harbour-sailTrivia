@@ -8,6 +8,8 @@ Page {
 
     allowedOrientations: Orientation.All
 
+    objectName: "QuestionPage"
+    //property string objectName: "QuestionPage"
     property int questionNumber: 3
     property int questionCount: 42
     property var questionModel
@@ -32,6 +34,9 @@ Page {
         question = que.question;
         correctAnswer = que.correctAnswer
         answers = que.answers
+
+        var total = statistics.getStatistic("totalCount");
+        ++total.numericValue;
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -44,7 +49,12 @@ Page {
                 text: qsTr("End game")
                 onClicked: {
                     console.log("We should end the game...");
-                    endGame();
+
+                    // Ending the game also skips the current question.
+                    var skipped = statistics.getStatistic("skippedCount");
+                    ++skipped.numericValue;
+
+                    endGame(true);
                 }
             }
             MenuItem {
@@ -53,8 +63,11 @@ Page {
                     console.log("We should skip the question...");
                     ++skippedCount;
 
+                    var skipped = statistics.getStatistic("skippedCount");
+                    ++skipped.numericValue;
+
                     if (questionNumber === questionCount) {
-                        endGame();
+                        endGame(false);
                     }
                     else {
                         nextQuestion();
@@ -148,11 +161,17 @@ Page {
                             {
                                 ++correctCount;
                                 parent.color = "green";
+
+                                var correct = statistics.getStatistic("correctCount");
+                                ++correct.numericValue;
                             }
                             else
                             {
                                 ++incorrectCount;
                                 parent.color = "red";
+
+                                var incorrect = statistics.getStatistic("incorrectCount");
+                                ++incorrect.numericValue;
                             }
 
                             questionChangeTimer.start();
@@ -180,7 +199,7 @@ Page {
             }
             else // End game.
             {
-                endGame();
+                endGame(false);
             }
         }
     }
@@ -189,7 +208,16 @@ Page {
         pageStack.replace(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": questionNumber + 1, "questionCount": questionCount, "questionModel": questionModel, "correctCount": correctCount, "incorrectCount": incorrectCount, "skippedCount": skippedCount});
     }
 
-    function endGame() {
+    function endGame(aborted) {
+        if (aborted === true) {
+            var abort = statistics.getStatistic("gamesAborted");
+            ++abort.numericValue;
+        }
+        else {
+            var played = statistics.getStatistic("gamesPlayed");
+            ++played.numericValue;
+        }
+
         pageStack.replace(Qt.resolvedUrl("EndGamePage.qml"), {"totalCount": questionCount, "correctCount": correctCount, "incorrectCount": incorrectCount, "skippedCount": skippedCount});
     }
 }

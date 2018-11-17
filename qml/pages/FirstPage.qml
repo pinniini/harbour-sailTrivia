@@ -18,8 +18,43 @@ Page {
     Component.onCompleted: {
         Stats.initializeDatabase()
 
+        // Load current statistics.
+        var statss = Stats.getStatistics()
+        if (statss !== false) {
+            for (var i = 0; i < statss.rows.length; ++i) {
+                var sta = statss.rows[i]
+                statistics.setStat(sta.key, sta.numericValue, sta.textValue)
+            }
+        }
+
         // Load categories.
         loadCategories()
+    }
+
+    // Closing the app, save the statistics.
+    Component.onDestruction: {
+        console.log("Closing app, save statistics...")
+
+        if (pageStack.currentPage && pageStack.currentPage.hasOwnProperty("objectName") && pageStack.currentPage.objectName == "QuestionPage") {
+            console.log("QuestionPage was open while closing the app...");
+            var skipd = statistics.getStatistic("skippedCount");
+            ++skipd.numericValue;
+        }
+
+        // Save statistics.
+        var sts = statistics.getStatistics();
+        var count = sts.length;
+        for (var i = 0; i < count; ++i) {
+            var stat = sts[i];
+            if (stat) {
+                Stats.upsertStatistic(stat.key, stat.numericValue, stat.numericValue.toString());
+            }
+        }
+
+//        var stat = statistics.getStatistic("gamesStarted")
+//        if (stat) {
+//            Stats.upsertStatistic("gamesStarted", stat.numericValue, stat.numericValue.toString());
+//        }
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -40,6 +75,8 @@ Page {
         onQuestionsLoaded: {
             questionModel.fillModel(questionData);
             dataLoading = false;
+            var gamesStarted = statistics.getStatistic("gamesStarted");
+            ++gamesStarted.numericValue;
             pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
         }
 
