@@ -12,7 +12,6 @@ DataLoader::DataLoader(QObject *parent) : QObject(parent)
 {
     _loading = false;
     _manager = new QNetworkAccessManager(this);
-//    _manager->activeConfiguration().setConnectionTimeOut()
     _categoriesUrl = QUrl("https://opentdb.com/api_category.php");
     _questionsBaseUrl = "https://opentdb.com/api.php?";
     _timeoutTimer = new QTimer();
@@ -210,7 +209,6 @@ void DataLoader::categoriesFinished()
     }
 
     qDebug() << "Categories loaded...";
-    //QJsonDocument doc = QJsonDocument::fromBinaryData(_reply->readAll());
 
     // Temp for data.
     QString categoryData = QString::fromLatin1(_reply->readAll());

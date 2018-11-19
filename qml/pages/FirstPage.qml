@@ -52,11 +52,6 @@ Page {
                 Stats.upsertStatistic(stat.key, stat.numericValue, stat.numericValue.toString());
             }
         }
-
-//        var stat = statistics.getStatistic("gamesStarted")
-//        if (stat) {
-//            Stats.upsertStatistic("gamesStarted", stat.numericValue, stat.numericValue.toString());
-//        }
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -205,7 +200,6 @@ Page {
 
                 onClicked: {
                     dataLoading = true;
-                    console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
                     dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
                 }
             }

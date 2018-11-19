@@ -106,9 +106,6 @@ QHash<int, QByteArray> QuestionModel::roleNames() const
 
 Question* QuestionModel::get(int index) const
 {
-    qDebug() << "QuestionModel::get(index) - index = " << index;
-    qDebug() << "QuestionModel::get(index) - questions count: " << _questions->length();
-
     if (_questions == 0 || index < 0 || index > _questions->length() - 1)
     {
         return 0;
@@ -171,8 +168,6 @@ void QuestionModel::readJson(const QJsonObject &object)
             QJsonObject quest = questions.at(i).toObject();
             readQuestion(quest);
         }
-
-        qDebug() << "QuestionsModel size: " << _questions->size();
 
         // End inserts.
         endInsertRows();

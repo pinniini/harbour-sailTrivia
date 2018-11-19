@@ -79,7 +79,6 @@ QVariantList Statistics::getStatistics()
 
 void Statistics::setStat(const QString &statKey, const double numericValue, const QString &textValue)
 {
-    qDebug() << "Setting stat: " << statKey << " " << numericValue << " " << textValue;
     Stat *stat = new Stat(statKey, numericValue, textValue);
 
     // This is necessary, so that the js engine won't garbage collect the object after using get-method.
