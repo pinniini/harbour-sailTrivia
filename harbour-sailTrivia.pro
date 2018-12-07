@@ -16,7 +16,7 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 QT += network
 
 # The name of your application
-TARGET = harbour-sailTrivia
+TARGET = harbour-sailtrivia
 
 CONFIG += sailfishapp
 
@@ -29,7 +29,7 @@ SOURCES += src/harbour-sailTrivia.cpp \
     src/statistics.cpp \
     src/stat.cpp
 
-DISTFILES += qml/harbour-sailTrivia.qml \
+DISTFILES += qml/harbour-sailtrivia.qml \
     qml/cover/CoverPage.qml \
     qml/pages/FirstPage.qml \
     qml/pages/SecondPage.qml \
@@ -38,24 +38,24 @@ DISTFILES += qml/harbour-sailTrivia.qml \
     rpm/harbour-sailTrivia.spec \
     rpm/harbour-sailTrivia.yaml \
     translations/*.ts \
-    harbour-sailTrivia.desktop \
     qml/pages/StatisticsPage.qml \
     qml/pages/AboutPage.qml \
     qml/pages/QuestionPage.qml \
     qml/pages/EndGamePage.qml \
-    qml/js/statistics.js
+    qml/js/statistics.js \
+    harbour-sailtrivia.desktop
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
 # to disable building translations every time, comment out the
 # following CONFIG line
-CONFIG += sailfishapp_i18n
+# CONFIG += sailfishapp_i18n
 
 # German translation is enabled as an example. If you aren't
 # planning to localize your app, remember to comment out the
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
-TRANSLATIONS += translations/harbour-sailTrivia-de.ts
+# TRANSLATIONS += translations/harbour-sailTrivia-de.ts
 
 HEADERS += \
     src/dataloader.h \
