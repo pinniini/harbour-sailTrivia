@@ -30,6 +30,8 @@ CategoryModel::~CategoryModel()
  */
 int CategoryModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
+
     if (_categories != 0)
     {
         return _categories->length();
@@ -113,8 +115,6 @@ void CategoryModel::readJson(const QJsonObject &object)
             QJsonObject cat = arr.at(i).toObject();
             readCategory(cat);
         }
-
-        qDebug() << "CategoryModel size: " << _categories->size();
 
         endInsertRows();
     }

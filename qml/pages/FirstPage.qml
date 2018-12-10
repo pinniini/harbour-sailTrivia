@@ -39,6 +39,8 @@ Page {
             console.log("QuestionPage was open while closing the app...");
             var skipd = statistics.getStatistic("skippedCount");
             ++skipd.numericValue;
+            var aborted = statistics.getStatistic("gamesAborted");
+            ++aborted.numericValue;
         }
 
         // Save statistics.
@@ -50,11 +52,6 @@ Page {
                 Stats.upsertStatistic(stat.key, stat.numericValue, stat.numericValue.toString());
             }
         }
-
-//        var stat = statistics.getStatistic("gamesStarted")
-//        if (stat) {
-//            Stats.upsertStatistic("gamesStarted", stat.numericValue, stat.numericValue.toString());
-//        }
     }
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
@@ -75,9 +72,12 @@ Page {
         onQuestionsLoaded: {
             questionModel.fillModel(questionData);
             dataLoading = false;
-            var gamesStarted = statistics.getStatistic("gamesStarted");
-            ++gamesStarted.numericValue;
-            pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+
+            if (questionModel.rowCount() > 0) {
+                var gamesStarted = statistics.getStatistic("gamesStarted");
+                ++gamesStarted.numericValue;
+                pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+            }
         }
 
         // Handle invalid parameters.
@@ -200,7 +200,6 @@ Page {
 
                 onClicked: {
                     dataLoading = true;
-                    console.log("Questions: " + questionCountSlider.value + ", Category id/name: " + currentCategoryId + "/" + categoryCombo.value + ", Difficulty: " + currentDifficulty)
                     dataLoader.loadQuestions(questionCountSlider.value, currentCategoryId, currentDifficulty);
                 }
             }

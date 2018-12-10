@@ -38,7 +38,6 @@ function initializeDatabase()
 // Returns the database or false if database is not initialized and for some reason initializing does not work.
 function getDatabase()
 {
-    console.log("Getting database...")
     // Check if the database is initialized or not.
     if(!initialized)
     {
