@@ -1,6 +1,7 @@
 #include <QNetworkRequest>
 #include <QNetworkConfiguration>
 #include <QJsonDocument>
+#include <QJsonObject>
 
 #include "dataloader.h"
 
@@ -17,6 +18,8 @@ DataLoader::DataLoader(QObject *parent) : QObject(parent)
     _timeoutTimer = new QTimer();
     _timeoutTimer->setInterval(5000); // 5 seconds timeout by default.
     _timeoutTimer->setSingleShot(true);
+    _sessionToken = "";
+    _sessionTokenUrl = "https://opentdb.com/api_token.php?command=request";
 
     // Connect timeout timer timeout.
     connect(_timeoutTimer, SIGNAL(timeout()), this, SLOT(downloadTimeout()));
@@ -37,6 +40,13 @@ DataLoader::~DataLoader()
     {
         delete _manager;
         _manager = 0;
+    }
+
+    // Session token.
+    if (_sessionTokenReply)
+    {
+        delete _sessionTokenReply;
+        _sessionTokenReply = 0;
     }
 
     // Delete timer.
@@ -156,6 +166,12 @@ void DataLoader::loadQuestions(int questionCount, int categoryId, int difficulty
         query += diffQuery;
     }
 
+    // Session token.
+    if (!_sessionToken.isEmpty())
+    {
+        query += ("&token=" + _sessionToken);
+    }
+
     qDebug() << "Questions query: " << query;
 
     // Parameters checked, start loading.
@@ -172,6 +188,16 @@ void DataLoader::loadQuestions(int questionCount, int categoryId, int difficulty
 
     // Start the timeout.
     _timeoutTimer->start();
+}
+
+void DataLoader::loadSessionToken()
+{
+    QNetworkRequest request(_sessionTokenUrl);
+    request.setHeader(QNetworkRequest::UserAgentHeader, "sailfish/pinniini/sailtrivia");
+    _sessionTokenReply = _manager->get(request);
+
+    connect(_sessionTokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingData(QNetworkReply::NetworkError)));
+    connect(_sessionTokenReply, SIGNAL(finished()), this, SLOT(sessionTokenFinished()));
 }
 
 /*!
@@ -278,6 +304,29 @@ void DataLoader::downloadTimeout()
         _reply->abort();
         QString errMsg = "Timeout occured while loading data.";
         emit dataLodingErrorOccured(errMsg);
+    }
+}
+
+void DataLoader::sessionTokenFinished()
+{
+    // Check for errors. These should be already reported by error-signal.
+    if (_sessionTokenReply->error() != QNetworkReply::NoError)
+    {
+        return;
+    }
+
+    qDebug() << "Session token loaded...";
+
+    // Read json.
+    QJsonDocument doc(QJsonDocument::fromJson(_sessionTokenReply->readAll()));
+    QJsonObject json = doc.object();
+
+    // Read the token.
+    if (json.contains("token") && json.value("token").isString())
+    {
+        // All is well in the world.
+        _sessionToken = json.value("token").toString();
+        emit sessionTokenLoaded(_sessionToken);
     }
 }
 

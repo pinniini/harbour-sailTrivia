@@ -29,6 +29,11 @@ public:
     /*!
      *
      */
+    Q_INVOKABLE void loadSessionToken();
+
+    /*!
+     *
+     */
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
 
     bool loading() const;
@@ -64,6 +69,12 @@ signals:
      */
     void dataLodingErrorOccured(const QString& errorMessage);
 
+    /*!
+     * \brief sessionTokenLoaded
+     * \param sessionToken
+     */
+    void sessionTokenLoaded(const QString& sessionToken);
+
 public slots:
 
 private slots:
@@ -71,6 +82,7 @@ private slots:
     void questionsFinished();
     void errorLoadingData(QNetworkReply::NetworkError error);
     void downloadTimeout();
+    void sessionTokenFinished();
 
 private:
     QNetworkAccessManager* _manager;
@@ -79,6 +91,11 @@ private:
     QNetworkReply* _reply;
     bool _loading;
     QTimer* _timeoutTimer;
+
+    // Session token stuff.
+    QNetworkReply* _sessionTokenReply;
+    QString _sessionToken;
+    QString _sessionTokenUrl;
 
     /*!
      * \brief setLoadingStatus

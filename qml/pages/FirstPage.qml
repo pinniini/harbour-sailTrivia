@@ -18,6 +18,9 @@ Page {
     Component.onCompleted: {
         Stats.initializeDatabase()
 
+        // Get session token.
+        dataLoader.loadSessionToken()
+
         // Load current statistics.
         var statss = Stats.getStatistics()
         if (statss !== false) {
@@ -91,6 +94,10 @@ Page {
             console.log(errorMessage)
             dataLoading = false
             categoriesLoading = false
+        }
+
+        onSessionTokenLoaded: {
+            console.log(sessionToken)
         }
     }
 
