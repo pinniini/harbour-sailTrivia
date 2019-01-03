@@ -192,12 +192,19 @@ void DataLoader::loadQuestions(int questionCount, int categoryId, int difficulty
 
 void DataLoader::loadSessionToken()
 {
-    QNetworkRequest request(_sessionTokenUrl);
-    request.setHeader(QNetworkRequest::UserAgentHeader, "sailfish/pinniini/sailtrivia");
-    _sessionTokenReply = _manager->get(request);
+    // If the reply does not exists or the reply exists and is finished.
+    if (!_sessionTokenReply || (_sessionTokenReply && _sessionTokenReply->isFinished()))
+    {
+        // Clear current session token.
+        _sessionToken = "";
 
-    connect(_sessionTokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingData(QNetworkReply::NetworkError)));
-    connect(_sessionTokenReply, SIGNAL(finished()), this, SLOT(sessionTokenFinished()));
+        QNetworkRequest request(_sessionTokenUrl);
+        request.setHeader(QNetworkRequest::UserAgentHeader, "sailfish/pinniini/sailtrivia");
+        _sessionTokenReply = _manager->get(request);
+
+        connect(_sessionTokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingSessionToken(QNetworkReply::NetworkError)));
+        connect(_sessionTokenReply, SIGNAL(finished()), this, SLOT(sessionTokenFinished()));
+    }
 }
 
 /*!
@@ -326,8 +333,25 @@ void DataLoader::sessionTokenFinished()
     {
         // All is well in the world.
         _sessionToken = json.value("token").toString();
+
+        // Clean the reply.
+        cleanSessionTokenRequest();
+
         emit sessionTokenLoaded(_sessionToken);
     }
+}
+
+void DataLoader::errorLoadingSessionToken(QNetworkReply::NetworkError error)
+{
+    Q_UNUSED(error);
+    QString errorMessage;
+
+    // Check that the reply exists.
+    if (_sessionTokenReply)
+    {
+        errorMessage = _sessionTokenReply->errorString();
+    }
+    emit sessionTokenLoadingError(errorMessage);
 }
 
 // ------------
@@ -359,4 +383,13 @@ void DataLoader::cleanQuestionsRequest()
     disconnect(_reply, SIGNAL(finished()), this, SLOT(questionsFinished()));
     delete _reply;
     _reply = 0;
+}
+
+void DataLoader::cleanSessionTokenRequest()
+{
+    // Clean stuff.
+    disconnect(_sessionTokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingSessionToken(QNetworkReply::NetworkError)));
+    disconnect(_sessionTokenReply, SIGNAL(finished()), this, SLOT(sessionTokenFinished()));
+    delete _sessionTokenReply;
+    _sessionTokenReply = 0;
 }

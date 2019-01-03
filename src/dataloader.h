@@ -75,6 +75,12 @@ signals:
      */
     void sessionTokenLoaded(const QString& sessionToken);
 
+    /*!
+     * \brief sessionTokenLoadingError
+     * \param errorMessage
+     */
+    void sessionTokenLoadingError(const QString& errorMessage);
+
 public slots:
 
 private slots:
@@ -83,6 +89,7 @@ private slots:
     void errorLoadingData(QNetworkReply::NetworkError error);
     void downloadTimeout();
     void sessionTokenFinished();
+    void errorLoadingSessionToken(QNetworkReply::NetworkError error);
 
 private:
     QNetworkAccessManager* _manager;
@@ -112,6 +119,11 @@ private:
      * \brief cleanQuestionsRequest
      */
     void cleanQuestionsRequest();
+
+    /*!
+     * \brief cleanSessionTokenRequest
+     */
+    void cleanSessionTokenRequest();
 };
 
 #endif // DATALOADER_H
