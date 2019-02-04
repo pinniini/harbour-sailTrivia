@@ -15,11 +15,13 @@ DataLoader::DataLoader(QObject *parent) : QObject(parent)
     _manager = new QNetworkAccessManager(this);
     _categoriesUrl = QUrl("https://opentdb.com/api_category.php");
     _questionsBaseUrl = "https://opentdb.com/api.php?";
+    _reply = 0;
     _timeoutTimer = new QTimer();
     _timeoutTimer->setInterval(5000); // 5 seconds timeout by default.
     _timeoutTimer->setSingleShot(true);
     _sessionToken = "";
     _sessionTokenUrl = "https://opentdb.com/api_token.php?command=request";
+    _sessionTokenReply = 0;
 
     // Connect timeout timer timeout.
     connect(_timeoutTimer, SIGNAL(timeout()), this, SLOT(downloadTimeout()));
@@ -351,6 +353,10 @@ void DataLoader::errorLoadingSessionToken(QNetworkReply::NetworkError error)
     {
         errorMessage = _sessionTokenReply->errorString();
     }
+
+    // Clean the reply.
+    cleanSessionTokenRequest();
+
     emit sessionTokenLoadingError(errorMessage);
 }
 

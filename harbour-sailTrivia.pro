@@ -43,7 +43,8 @@ DISTFILES += qml/harbour-sailtrivia.qml \
     qml/pages/QuestionPage.qml \
     qml/pages/EndGamePage.qml \
     qml/js/statistics.js \
-    harbour-sailtrivia.desktop
+    harbour-sailtrivia.desktop \
+    qml/pages/SplashPage.qml
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
