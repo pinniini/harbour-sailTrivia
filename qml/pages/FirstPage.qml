@@ -100,7 +100,7 @@ Page {
                 case 3:
                     dataLoader.loadSessionToken();
                     dataLoading = false;
-                    notification.showMessage("image://theme/icon-system-warning", "Session token expired.");
+                    notification.showMessage("image://theme/icon-system-warning", "Session token expired. Loading new.");
                     break;
                 default:
                     break;
