@@ -106,6 +106,23 @@ Page {
             }
 
             SectionHeader {
+                text: qsTr("Credits")
+            }
+
+            Label {
+                id: applicationIcon
+                wrapMode: Text.Wrap
+                width: parent.width - Theme.paddingMedium
+                x: Theme.paddingMedium
+                text: Theme.highlightText(qsTr("Application icon: JSEHV"), "JSEHV", Theme.highlightColor)
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Qt.openUrlExternally("https://github.com/JSEHV")
+                }
+            }
+
+            SectionHeader {
                 text: qsTr("Ideas/Issues/Want to help")
             }
 

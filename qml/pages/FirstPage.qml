@@ -15,8 +15,14 @@ Page {
     property bool dataLoading: false
     property bool categoriesLoading: false
 
+    // The effective value will be restricted by ApplicationWindow.allowedOrientations
+    allowedOrientations: Orientation.All
+
     Component.onCompleted: {
         Stats.initializeDatabase()
+
+        // Get session token.
+        dataLoader.loadSessionToken()
 
         // Load current statistics.
         var statss = Stats.getStatistics()
@@ -54,9 +60,6 @@ Page {
         }
     }
 
-    // The effective value will be restricted by ApplicationWindow.allowedOrientations
-    allowedOrientations: Orientation.All
-
     DataLoader {
         id: dataLoader
 
@@ -70,13 +73,38 @@ Page {
 
         // Handle questions load.
         onQuestionsLoaded: {
-            questionModel.fillModel(questionData);
-            dataLoading = false;
+            var success = questionModel.fillModel(questionData);
+            console.log(success)
+            console.log(questionModel.responseCode)
+            if (success === true)
+            {
+                dataLoading = false;
 
-            if (questionModel.rowCount() > 0) {
-                var gamesStarted = statistics.getStatistic("gamesStarted");
-                ++gamesStarted.numericValue;
-                pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+                if (questionModel.rowCount() > 0) {
+                    var gamesStarted = statistics.getStatistic("gamesStarted");
+                    ++gamesStarted.numericValue;
+                    pageStack.push(Qt.resolvedUrl("QuestionPage.qml"), {"questionNumber": 1, "questionCount": questionModel.rowCount(), "questionModel": questionModel})
+                }
+            }
+            else
+            {
+                switch (questionModel.responseCode)
+                {
+                case 1:
+                case 2:
+                case 4:
+                    dataLoading = false;
+                    console.log(questionModel.error);
+                    notification.showMessage("image://theme/icon-system-warning", questionModel.error);
+                    break;
+                case 3:
+                    dataLoader.loadSessionToken();
+                    dataLoading = false;
+                    notification.showMessage("image://theme/icon-system-warning", "Session token expired. Loading new.");
+                    break;
+                default:
+                    break;
+                }
             }
         }
 
@@ -89,8 +117,13 @@ Page {
 
         onDataLodingErrorOccured: {
             console.log(errorMessage)
+            notification.showMessage("image://theme/icon-system-warning", errorMessage)
             dataLoading = false
             categoriesLoading = false
+        }
+
+        onSessionTokenLoaded: {
+            console.log(sessionToken)
         }
     }
 
@@ -117,6 +150,12 @@ Page {
                     loadCategories()
                 }
             }
+//            MenuItem {
+//                text: "test"
+//                onClicked: {
+//                    pageStack.push(Qt.resolvedUrl("SplashPage.qml"))
+//                }
+//            }
         }
 
         // Tell SilicaFlickable the height of its content.
