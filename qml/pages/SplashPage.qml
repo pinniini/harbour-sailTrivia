@@ -3,13 +3,16 @@ import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 
 Page {
-    allowedOrientations: Orientation.All
+    allowedOrientations: Orientation.Portrait
     anchors.fill: parent
+    clip: true
 
     Image {
         id: bg
         source: "../images/splash_bg.png"
-        anchors.fill: parent
+        anchors.centerIn: parent
+        width: (parent.width < parent.height ? parent.width : parent.height) - Theme.paddingLarge - Theme.paddingLarge
+        height: width
         smooth: true
         visible: false
     }
@@ -21,7 +24,6 @@ Page {
     }
 
     Label {
-//        anchors.centerIn: parent
         anchors {
             left: parent.left
             right: parent.right
@@ -32,6 +34,6 @@ Page {
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: Theme.fontSizeExtraLarge
         color: Theme.highlightColor
-        text: qsTr("Loading initial data...")
+        text: qsTr("Loading...")
     }
 }

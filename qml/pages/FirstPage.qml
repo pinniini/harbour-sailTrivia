@@ -6,6 +6,7 @@ import "../js/statistics.js" as Stats
 
 Page {
     id: page
+    clip: true
 
     property int currentCategoryId: -1
     property bool categoriesLoaded: false
@@ -41,7 +42,7 @@ Page {
     Component.onDestruction: {
         console.log("Closing app, save statistics...")
 
-        if (pageStack.currentPage && pageStack.currentPage.hasOwnProperty("objectName") && pageStack.currentPage.objectName == "QuestionPage") {
+        if (pageStack.currentPage && pageStack.currentPage.hasOwnProperty("objectName") && pageStack.currentPage.objectName === "QuestionPage") {
             console.log("QuestionPage was open while closing the app...");
             var skipd = statistics.getStatistic("skippedCount");
             ++skipd.numericValue;
@@ -150,12 +151,6 @@ Page {
                     loadCategories()
                 }
             }
-//            MenuItem {
-//                text: "test"
-//                onClicked: {
-//                    pageStack.push(Qt.resolvedUrl("SplashPage.qml"))
-//                }
-//            }
         }
 
         // Tell SilicaFlickable the height of its content.
