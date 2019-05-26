@@ -10,7 +10,7 @@
 #   - translation filenames have to be changed
 
 # Application version.
-VERSION = 1.0.0
+VERSION = 1.1.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 QT += network
@@ -33,10 +33,10 @@ DISTFILES += qml/harbour-sailtrivia.qml \
     qml/cover/CoverPage.qml \
     qml/pages/FirstPage.qml \
     qml/pages/SecondPage.qml \
-    rpm/harbour-sailTrivia.changes.in \
-    rpm/harbour-sailTrivia.changes.run.in \
-    rpm/harbour-sailTrivia.spec \
-    rpm/harbour-sailTrivia.yaml \
+    rpm/harbour-sailtrivia.changes.in \
+    rpm/harbour-sailtrivia.changes.run.in \
+    rpm/harbour-sailtrivia.spec \
+    rpm/harbour-sailtrivia.yaml \
     translations/*.ts \
     qml/pages/StatisticsPage.qml \
     qml/pages/AboutPage.qml \

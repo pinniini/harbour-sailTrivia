@@ -7,6 +7,11 @@ Page {
     anchors.fill: parent
     clip: true
 
+    Component.onCompleted: {
+        testDataLoader.loadSessionToken();
+        testDataLoader.loadCategories();
+    }
+
     Image {
         id: bg
         source: "../images/splash_bg.png"

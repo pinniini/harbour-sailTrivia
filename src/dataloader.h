@@ -31,6 +31,8 @@ public:
      */
     Q_INVOKABLE void loadSessionToken();
 
+    Q_INVOKABLE void stopInitialLoading();
+
     /*!
      *
      */
@@ -81,6 +83,11 @@ signals:
      */
     void sessionTokenLoadingError(const QString& errorMessage);
 
+    /*!
+     * \brief Signal to tell that the initial data (session token and categories) are loaded successfully.
+     */
+    void initialDataLoaded(const QString& categoriesData);
+
 public slots:
 
 private slots:
@@ -98,6 +105,9 @@ private:
     QNetworkReply* _reply;
     bool _loading;
     QTimer* _timeoutTimer;
+    bool _initialTokenLoaded;
+    bool _initialCategoriesLoaded;
+    QString _initialCategoriesData;
 
     // Session token stuff.
     QNetworkReply* _sessionTokenReply;

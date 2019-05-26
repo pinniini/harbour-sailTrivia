@@ -12,6 +12,9 @@
 DataLoader::DataLoader(QObject *parent) : QObject(parent)
 {
     _loading = false;
+    _initialTokenLoaded = false;
+    _initialCategoriesLoaded = false;
+    _initialCategoriesData = "";
     _manager = new QNetworkAccessManager(this);
     _categoriesUrl = QUrl("https://opentdb.com/api_category.php");
     _questionsBaseUrl = "https://opentdb.com/api.php?";
@@ -209,6 +212,21 @@ void DataLoader::loadSessionToken()
     }
 }
 
+void DataLoader::stopInitialLoading()
+{
+    if (_reply && !_reply->isFinished())
+    {
+        _reply->abort();
+        cleanCategoriesRequest();
+    }
+
+    if (_sessionTokenReply && !_sessionTokenReply->isFinished())
+    {
+        _sessionTokenReply->abort();
+        cleanSessionTokenRequest();
+    }
+}
+
 /*!
  * \brief DataLoader::loading
  * \return Status whether or not the loader is still loading data.
@@ -248,11 +266,27 @@ void DataLoader::categoriesFinished()
     // Temp for data.
     QString categoryData = QString::fromLatin1(_reply->readAll());
 
+    if (!_initialCategoriesLoaded)
+    {
+        _initialCategoriesData = categoryData;
+    }
+
     // Clean stuff.
     disconnect(_reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingData(QNetworkReply::NetworkError)));
     disconnect(_reply, SIGNAL(finished()), this, SLOT(categoriesFinished()));
     delete _reply;
     _reply = 0;
+
+    qDebug() << "Categories: " << _initialCategoriesLoaded << ", Token: " << _initialTokenLoaded;
+    // Categories were not loaded but session token was -> initial loading done.
+    if (!_initialCategoriesLoaded && _initialTokenLoaded)
+    {
+        _initialCategoriesLoaded = true;
+        emit initialDataLoaded(_initialCategoriesData);
+        return;
+    }
+
+    _initialCategoriesLoaded = true;
 
     emit categoriesLoaded(categoryData);
 }
@@ -338,6 +372,17 @@ void DataLoader::sessionTokenFinished()
 
         // Clean the reply.
         cleanSessionTokenRequest();
+
+        qDebug() << "Token: " << _initialTokenLoaded << ", Categories: " << _initialCategoriesLoaded;
+        // Session token was not loaded but categories were -> initial loading done.
+        if (!_initialTokenLoaded && _initialCategoriesLoaded)
+        {
+            _initialTokenLoaded = true;
+            emit initialDataLoaded(_initialCategoriesData);
+            return;
+        }
+
+        _initialTokenLoaded = true;
 
         emit sessionTokenLoaded(_sessionToken);
     }

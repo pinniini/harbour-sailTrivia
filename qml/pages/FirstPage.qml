@@ -12,18 +12,21 @@ Page {
     property bool categoriesLoaded: false
     property int currentDifficulty: Difficulty.All
 
-    // Data loadin
+    // Data loading
     property bool dataLoading: false
-    property bool categoriesLoading: false
+    property bool categoriesLoading: true
+
+    // Common data loader.
+    property DataLoader dataLoader
+    property string initialCategoriesData: "";
+
+    property QuestionModel questionModel
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
     Component.onCompleted: {
         Stats.initializeDatabase()
-
-        // Get session token.
-        dataLoader.loadSessionToken()
 
         // Load current statistics.
         var statss = Stats.getStatistics()
@@ -34,8 +37,12 @@ Page {
             }
         }
 
-        // Load categories.
-        loadCategories()
+        if (initialCategoriesData && initialCategoriesData != "") {
+            categoriesModel.fillModel(initialCategoriesData);
+            page.categoriesLoaded = true;
+            categoriesLoading = false
+            categoryCombo.currentIndex = 0
+        }
     }
 
     // Closing the app, save the statistics.
@@ -61,10 +68,9 @@ Page {
         }
     }
 
-    DataLoader {
-        id: dataLoader
+    Connections {
+        target: dataLoader
 
-        // Handle categories load.
         onCategoriesLoaded: {
             categoriesModel.fillModel(categoriesData);
             page.categoriesLoaded = true;
@@ -121,10 +127,6 @@ Page {
             notification.showMessage("image://theme/icon-system-warning", errorMessage)
             dataLoading = false
             categoriesLoading = false
-        }
-
-        onSessionTokenLoaded: {
-            console.log(sessionToken)
         }
     }
 
@@ -248,10 +250,6 @@ Page {
 
     CategoryModel {
         id: categoriesModel
-    }
-
-    QuestionModel {
-        id: questionModel
     }
 
     // Load categories.
