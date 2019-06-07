@@ -225,6 +225,8 @@ void DataLoader::stopInitialLoading()
         _sessionTokenReply->abort();
         cleanSessionTokenRequest();
     }
+
+    emit initialDataLoaded(_initialCategoriesData);
 }
 
 /*!
@@ -265,6 +267,9 @@ void DataLoader::categoriesFinished()
 
     // Temp for data.
     QString categoryData = QString::fromLatin1(_reply->readAll());
+
+    // Clear initial categories data just for safety.
+    _initialCategoriesData = "";
 
     if (!_initialCategoriesLoaded)
     {
@@ -386,6 +391,24 @@ void DataLoader::sessionTokenFinished()
 
         emit sessionTokenLoaded(_sessionToken);
     }
+    else // Got something funky instead of session token.
+    {
+        // Clean the reply.
+        cleanSessionTokenRequest();
+
+        QString errorMessage = "Got something unexpected when loading session token.";
+
+        if (!_initialTokenLoaded && _initialCategoriesLoaded)
+        {
+            _initialTokenLoaded = true;
+            emit initialDataLoaded(_initialCategoriesData);
+            return;
+        }
+
+        _initialTokenLoaded = true;
+
+        emit sessionTokenLoadingError(errorMessage);
+    }
 }
 
 void DataLoader::errorLoadingSessionToken(QNetworkReply::NetworkError error)
@@ -398,6 +421,9 @@ void DataLoader::errorLoadingSessionToken(QNetworkReply::NetworkError error)
     {
         errorMessage = _sessionTokenReply->errorString();
     }
+
+    // Just for safety.
+    _initialTokenLoaded = true;
 
     // Clean the reply.
     cleanSessionTokenRequest();

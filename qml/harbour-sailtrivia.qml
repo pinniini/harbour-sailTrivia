@@ -10,19 +10,44 @@ ApplicationWindow
 {
     id: appWindow
     initialPage: Component { SplashPage { } }
-//    cover: Qt.resolvedUrl("cover/CoverPage.qml")
     cover: Component { CoverPage { } }
     allowedOrientations: Orientation.All
 
     DataLoader {
         id: testDataLoader
+    }
+
+    Connections {
+        id: dataConnections
+        target: testDataLoader
+        ignoreUnknownSignals: true
 
         onInitialDataLoaded: {
+            console.log("Initial data loaded, go to main page...");
+
             if (initialTimer.running) {
                 initialTimer.stop();
             }
 
+            dataConnections.target = null;
             pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': categoriesData, 'questionModel': questionModel })
+        }
+
+        onDataLodingErrorOccured: {
+            console.log(errorMessage)
+            notification.showMessage("image://theme/icon-system-warning", errorMessage)
+
+            if (initialTimer.running) {
+                initialTimer.stop();
+            }
+
+            dataConnections.target = null;
+            pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': "", 'questionModel': questionModel })
+        }
+
+        onSessionTokenLoadingError: {
+            console.log(errorMessage)
+            notification.showMessage("image://theme/icon-system-warning", errorMessage)
         }
     }
 
