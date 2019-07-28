@@ -13,11 +13,11 @@ Name:       harbour-sailtrivia
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    SailTrivia - a simple trivia game
-Version:    1.1
+Version:    1.2
 Release:    1
 Group:      Qt/Qt
-License:    MIT
-URL:        https://github.com/pinniini/harbour-sailTrivia
+License:    LICENSE
+URL:        http://example.org/
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-sailtrivia.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9

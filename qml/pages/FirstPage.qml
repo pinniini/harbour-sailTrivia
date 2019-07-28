@@ -232,7 +232,7 @@ Page {
                 id: startButton
                 text: qsTr("Start")
                 anchors.horizontalCenter: parent.horizontalCenter
-                enabled: !dataLoader.loading
+                enabled: !dataLoader.loading && categoriesLoaded && !categoriesLoading
 
                 onClicked: {
                     dataLoading = true;

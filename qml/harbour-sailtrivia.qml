@@ -42,7 +42,7 @@ ApplicationWindow
             }
 
             dataConnections.target = null;
-            pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': "", 'questionModel': questionModel })
+            pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': "", 'questionModel': questionModel, 'categoriesLoading': false, 'dataLoading': false })
         }
 
         onSessionTokenLoadingError: {
