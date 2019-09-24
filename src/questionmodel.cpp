@@ -19,6 +19,7 @@ QuestionModel::QuestionModel(QObject *parent) : QAbstractListModel(parent)
     _questions = new QVector<Question*>();
     _lastError = "";
     _responseCode = -1;
+    _currentQuestionIndex = -1;
 }
 
 /*!
@@ -106,12 +107,14 @@ QHash<int, QByteArray> QuestionModel::roleNames() const
     return roles;
 }
 
-Question* QuestionModel::get(int index) const
+Question* QuestionModel::get(int index)
 {
     if (_questions == 0 || index < 0 || index > _questions->length() - 1)
     {
         return 0;
     }
+
+    _currentQuestionIndex = index;
 
     return _questions->at(index);
 }
@@ -140,6 +143,26 @@ bool QuestionModel::fillModel(const QString &json)
 
     QJsonDocument document(QJsonDocument::fromJson(json.toLatin1()));
     return readJson(document.object());
+}
+
+Question* QuestionModel::getCurrentQuestion() const
+{
+    qDebug() << "Current question index: " << _currentQuestionIndex;
+
+    if (_questions == 0 || _currentQuestionIndex < 0 || _currentQuestionIndex > _questions->length() - 1)
+    {
+        qDebug() << "Current question not found...";
+        return 0;
+    }
+
+    qDebug() << "Current question: " << _questions->at(_currentQuestionIndex)->question();
+
+    return _questions->at(_currentQuestionIndex);
+}
+
+void QuestionModel::clearCurrentIndex()
+{
+    _currentQuestionIndex = -1;
 }
 
 QString QuestionModel::getLastError() const

@@ -6,23 +6,27 @@ import "../js/statistics.js" as Stats
 
 Page {
     id: page
+    clip: true
 
     property int currentCategoryId: -1
     property bool categoriesLoaded: false
     property int currentDifficulty: Difficulty.All
 
-    // Data loadin
+    // Data loading
     property bool dataLoading: false
-    property bool categoriesLoading: false
+    property bool categoriesLoading: true
+
+    // Common data loader.
+    property DataLoader dataLoader
+    property string initialCategoriesData: "";
+
+    property QuestionModel questionModel
 
     // The effective value will be restricted by ApplicationWindow.allowedOrientations
     allowedOrientations: Orientation.All
 
     Component.onCompleted: {
         Stats.initializeDatabase()
-
-        // Get session token.
-        dataLoader.loadSessionToken()
 
         // Load current statistics.
         var statss = Stats.getStatistics()
@@ -33,15 +37,19 @@ Page {
             }
         }
 
-        // Load categories.
-        loadCategories()
+        if (initialCategoriesData && initialCategoriesData != "") {
+            categoriesModel.fillModel(initialCategoriesData);
+            page.categoriesLoaded = true;
+            categoriesLoading = false
+            categoryCombo.currentIndex = 0
+        }
     }
 
     // Closing the app, save the statistics.
     Component.onDestruction: {
         console.log("Closing app, save statistics...")
 
-        if (pageStack.currentPage && pageStack.currentPage.hasOwnProperty("objectName") && pageStack.currentPage.objectName == "QuestionPage") {
+        if (pageStack.currentPage && pageStack.currentPage.hasOwnProperty("objectName") && pageStack.currentPage.objectName === "QuestionPage") {
             console.log("QuestionPage was open while closing the app...");
             var skipd = statistics.getStatistic("skippedCount");
             ++skipd.numericValue;
@@ -60,14 +68,16 @@ Page {
         }
     }
 
-    DataLoader {
-        id: dataLoader
+    Connections {
+        id: dataConnections
+        target: dataLoader
 
-        // Handle categories load.
         onCategoriesLoaded: {
+            console.log("FirstPage:onCategoriesLoaded...");
             categoriesModel.fillModel(categoriesData);
             page.categoriesLoaded = true;
             categoriesLoading = false
+            dataLoading = false
             categoryCombo.currentIndex = 0
         }
 
@@ -121,10 +131,6 @@ Page {
             dataLoading = false
             categoriesLoading = false
         }
-
-        onSessionTokenLoaded: {
-            console.log(sessionToken)
-        }
     }
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
@@ -150,12 +156,6 @@ Page {
                     loadCategories()
                 }
             }
-//            MenuItem {
-//                text: "test"
-//                onClicked: {
-//                    pageStack.push(Qt.resolvedUrl("SplashPage.qml"))
-//                }
-//            }
         }
 
         // Tell SilicaFlickable the height of its content.
@@ -235,7 +235,7 @@ Page {
                 id: startButton
                 text: qsTr("Start")
                 anchors.horizontalCenter: parent.horizontalCenter
-                enabled: !dataLoader.loading
+                enabled: !dataLoader.loading && categoriesLoaded && !categoriesLoading
 
                 onClicked: {
                     dataLoading = true;
@@ -253,10 +253,6 @@ Page {
 
     CategoryModel {
         id: categoriesModel
-    }
-
-    QuestionModel {
-        id: questionModel
     }
 
     // Load categories.

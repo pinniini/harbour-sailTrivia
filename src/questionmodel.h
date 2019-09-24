@@ -50,9 +50,13 @@ public:
      */
     QHash<int, QByteArray> roleNames() const;
 
-    Q_INVOKABLE Question* get(int index) const;
+    Q_INVOKABLE Question* get(int index);
 
     Q_INVOKABLE bool fillModel(const QString &json);
+
+    Q_INVOKABLE Question* getCurrentQuestion() const;
+
+    Q_INVOKABLE void clearCurrentIndex();
 
     QString getLastError() const;
 
@@ -62,6 +66,7 @@ private:
     QVector<Question*> *_questions;
     QString _lastError;
     int _responseCode;
+    int _currentQuestionIndex;
 
     bool readJson(const QJsonObject &object);
     void readQuestion(const QJsonObject &json);

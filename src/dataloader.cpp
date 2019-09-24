@@ -12,6 +12,9 @@
 DataLoader::DataLoader(QObject *parent) : QObject(parent)
 {
     _loading = false;
+    _initialTokenLoaded = false;
+    _initialCategoriesLoaded = false;
+    _initialCategoriesData = "";
     _manager = new QNetworkAccessManager(this);
     _categoriesUrl = QUrl("https://opentdb.com/api_category.php");
     _questionsBaseUrl = "https://opentdb.com/api.php?";
@@ -22,6 +25,7 @@ DataLoader::DataLoader(QObject *parent) : QObject(parent)
     _sessionToken = "";
     _sessionTokenUrl = "https://opentdb.com/api_token.php?command=request";
     _sessionTokenReply = 0;
+    _initialDataLoading = true;
 
     // Connect timeout timer timeout.
     connect(_timeoutTimer, SIGNAL(timeout()), this, SLOT(downloadTimeout()));
@@ -71,6 +75,19 @@ DataLoader::~DataLoader()
  */
 void DataLoader::loadCategories()
 {
+    switch (_manager->networkAccessible())
+    {
+    case QNetworkAccessManager::UnknownAccessibility:
+        qDebug() << "Network accessibility unknown...";
+        break;
+    case QNetworkAccessManager::NotAccessible:
+        qDebug() << "Network not accessible...";
+        break;
+    case QNetworkAccessManager::Accessible:
+        qDebug() << "Network accessible...";
+        break;
+    }
+
     // Stop timer if it is for some reason still running.
     if (_timeoutTimer->isActive())
     {
@@ -209,6 +226,33 @@ void DataLoader::loadSessionToken()
     }
 }
 
+void DataLoader::loadInitialData()
+{
+    _initialDataLoading = true;
+    _initialCategoriesLoaded = false;
+    _initialTokenLoaded = false;
+    loadSessionToken();
+}
+
+void DataLoader::stopInitialLoading()
+{
+    _initialDataLoading = false;
+
+    if (_reply && !_reply->isFinished())
+    {
+        _reply->abort();
+        cleanCategoriesRequest();
+    }
+
+    if (_sessionTokenReply && !_sessionTokenReply->isFinished())
+    {
+        _sessionTokenReply->abort();
+        cleanSessionTokenRequest();
+    }
+
+    emit initialDataLoaded(_initialCategoriesData);
+}
+
 /*!
  * \brief DataLoader::loading
  * \return Status whether or not the loader is still loading data.
@@ -239,7 +283,7 @@ void DataLoader::categoriesFinished()
     // Check for errors. These should be already reported by error-signal.
     if (_reply->error() != QNetworkReply::NoError)
     {
-        cleanQuestionsRequest();
+        cleanCategoriesRequest();
         return;
     }
 
@@ -248,11 +292,35 @@ void DataLoader::categoriesFinished()
     // Temp for data.
     QString categoryData = QString::fromLatin1(_reply->readAll());
 
+    // Clear initial categories data just for safety.
+    _initialCategoriesData = "";
+
+    if (!_initialCategoriesLoaded)
+    {
+        _initialCategoriesData = categoryData;
+    }
+
     // Clean stuff.
-    disconnect(_reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingData(QNetworkReply::NetworkError)));
-    disconnect(_reply, SIGNAL(finished()), this, SLOT(categoriesFinished()));
-    delete _reply;
-    _reply = 0;
+    cleanCategoriesRequest();
+
+//    qDebug() << "Categories: " << _initialCategoriesLoaded << ", Token: " << _initialTokenLoaded;
+//    // Categories were not loaded but session token was -> initial loading done.
+//    if (!_initialCategoriesLoaded && _initialTokenLoaded)
+//    {
+//        _initialCategoriesLoaded = true;
+//        emit initialDataLoaded(_initialCategoriesData);
+//        return;
+//    }
+
+    _initialCategoriesLoaded = true;
+
+    // If this was initial data loading.
+    if (_initialDataLoading)
+    {
+        _initialDataLoading = false;
+        emit initialDataLoaded(_initialCategoriesData);
+        return;
+    }
 
     emit categoriesLoaded(categoryData);
 }
@@ -298,8 +366,32 @@ void DataLoader::questionsFinished()
  */
 void DataLoader::errorLoadingData(QNetworkReply::NetworkError error)
 {
-    Q_UNUSED(error);
-    QString errMsg = _reply->errorString();
+    // Stop the timer.
+    if (_timeoutTimer && _timeoutTimer->isActive())
+    {
+        _timeoutTimer->stop();
+    }
+
+    QString errMsg = "Error loading data.";
+    if (_reply)
+    {
+        errMsg = _reply->errorString();
+
+        cleanCategoriesRequest();
+    }
+
+    // If initial data loading and OperationCanceled-error -> retry.
+    if (_initialDataLoading && error == QNetworkReply::OperationCanceledError)
+    {
+        qDebug() << "Error loading data. _initialDataLoading=true & error=OperationCanceledError...";
+        _initialDataLoading = false;
+        loadCategories();
+        return;
+    }
+
+    // Just for safety.
+    _initialDataLoading = false;
+
     emit dataLodingErrorOccured(errMsg);
 }
 
@@ -339,23 +431,76 @@ void DataLoader::sessionTokenFinished()
         // Clean the reply.
         cleanSessionTokenRequest();
 
+//        qDebug() << "Token: " << _initialTokenLoaded << ", Categories: " << _initialCategoriesLoaded;
+//        // Session token was not loaded but categories were -> initial loading done.
+//        if (!_initialTokenLoaded && _initialCategoriesLoaded)
+//        {
+//            _initialTokenLoaded = true;
+//            emit initialDataLoaded(_initialCategoriesData);
+//            return;
+//        }
+
+        _initialTokenLoaded = true;
+
         emit sessionTokenLoaded(_sessionToken);
+
+        // If still loading initial data, load initial categories as well.
+        if (_initialDataLoading)
+        {
+            loadCategories();
+            return;
+        }
+    }
+    else // Got something funky instead of session token.
+    {
+        // Clean the reply.
+        cleanSessionTokenRequest();
+
+        QString errorMessage = "Got something unexpected when loading session token.";
+
+//        if (!_initialTokenLoaded && _initialCategoriesLoaded)
+//        {
+//            _initialTokenLoaded = true;
+//            emit initialDataLoaded(_initialCategoriesData);
+//            return;
+//        }
+
+        _initialTokenLoaded = true;
+
+        emit sessionTokenLoadingError(errorMessage);
+
+        // If still loading initial data, load initial categories as well.
+        if (_initialDataLoading)
+        {
+            loadCategories();
+        }
     }
 }
 
 void DataLoader::errorLoadingSessionToken(QNetworkReply::NetworkError error)
 {
-    Q_UNUSED(error);
+    Q_UNUSED(error)
+
     QString errorMessage;
 
     // Check that the reply exists.
     if (_sessionTokenReply)
     {
         errorMessage = _sessionTokenReply->errorString();
+
+        // Clean the reply.
+        cleanSessionTokenRequest();
     }
 
-    // Clean the reply.
-    cleanSessionTokenRequest();
+    // If initial data loading and error -> retry.
+//    if (_initialDataLoading)
+//    {
+//        loadSessionToken();
+//        return;
+//    }
+
+    // Just for safety.
+    _initialTokenLoaded = true;
 
     emit sessionTokenLoadingError(errorMessage);
 }
