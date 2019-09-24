@@ -69,12 +69,15 @@ Page {
     }
 
     Connections {
+        id: dataConnections
         target: dataLoader
 
         onCategoriesLoaded: {
+            console.log("FirstPage:onCategoriesLoaded...");
             categoriesModel.fillModel(categoriesData);
             page.categoriesLoaded = true;
             categoriesLoading = false
+            dataLoading = false
             categoryCombo.currentIndex = 0
         }
 

@@ -34,8 +34,8 @@ CoverBackground {
     Column {
         id: coverColumn
         anchors.fill: parent
-        spacing: 20
-        anchors.margins: Theme.paddingLarge
+        spacing: Theme.paddingLarge
+        anchors.margins: Theme.paddingMedium
 
         Label {
             id: categoryLabel
@@ -56,11 +56,13 @@ CoverBackground {
         Label {
             id: questionLabel
             width: parent.width
+            height: parent.height - categoryLabel.height - difficultyLabel.height - parent.spacing - parent.spacing - Theme.paddingMedium - Theme.paddingMedium
             elide: Text.ElideRight
             text: ""
             maximumLineCount: 3
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             textFormat: Text.RichText
+            clip: true
         }
     }
 }

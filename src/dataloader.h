@@ -31,6 +31,8 @@ public:
      */
     Q_INVOKABLE void loadSessionToken();
 
+    Q_INVOKABLE void loadInitialData();
+
     Q_INVOKABLE void stopInitialLoading();
 
     /*!
@@ -108,6 +110,7 @@ private:
     bool _initialTokenLoaded;
     bool _initialCategoriesLoaded;
     QString _initialCategoriesData;
+    bool _initialDataLoading;
 
     // Session token stuff.
     QNetworkReply* _sessionTokenReply;

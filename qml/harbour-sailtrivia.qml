@@ -30,7 +30,7 @@ ApplicationWindow
             }
 
             dataConnections.target = null;
-            pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': categoriesData, 'questionModel': questionModel })
+            pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': categoriesData, 'questionModel': questionModel, 'categoriesLoading': false, 'dataLoading': false })
         }
 
         onDataLodingErrorOccured: {
@@ -41,6 +41,8 @@ ApplicationWindow
                 initialTimer.stop();
             }
 
+            console.log("Initial data loading failed, go to first page...");
+
             dataConnections.target = null;
             pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': "", 'questionModel': questionModel, 'categoriesLoading': false, 'dataLoading': false })
         }
@@ -48,6 +50,7 @@ ApplicationWindow
         onSessionTokenLoadingError: {
             console.log(errorMessage)
             notification.showMessage("image://theme/icon-system-warning", errorMessage)
+            testDataLoader.loadCategories();
         }
     }
 
@@ -82,8 +85,9 @@ ApplicationWindow
         running: true
 
         onTriggered: {
+            dataConnections.target = null;
             testDataLoader.stopInitialLoading();
-            pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': "", 'questionModel': questionModel })
+            pageStack.replace(Qt.resolvedUrl("pages/FirstPage.qml"), { 'dataLoader': testDataLoader, 'initialCategoriesData': "", 'questionModel': questionModel, 'categoriesLoading': false, 'dataLoading': false })
         }
     }
 }

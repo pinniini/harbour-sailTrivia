@@ -8,8 +8,7 @@ Page {
     clip: true
 
     Component.onCompleted: {
-        testDataLoader.loadSessionToken();
-        testDataLoader.loadCategories();
+        testDataLoader.loadInitialData();
     }
 
     Image {
