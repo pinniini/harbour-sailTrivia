@@ -24,3 +24,8 @@ QString Category::name() const
 {
     return _name;
 }
+
+bool Category::operator < (const Category &cat) const
+{
+    return _name < cat.name();
+}

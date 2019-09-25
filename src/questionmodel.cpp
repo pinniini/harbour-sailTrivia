@@ -4,6 +4,8 @@
 #include <QtQml>
 
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
 
 #include "questionmodel.h"
 #include "jsonconstants.h"
@@ -16,7 +18,12 @@ using namespace JsonConstants;
  */
 QuestionModel::QuestionModel(QObject *parent) : QAbstractListModel(parent)
 {
+    std::srand(unsigned(std::time(0)));
+
     _questions = new QVector<Question*>();
+    _lastError = "";
+    _responseCode = -1;
+    _currentQuestionIndex = -1;
 }
 
 /*!
@@ -104,12 +111,14 @@ QHash<int, QByteArray> QuestionModel::roleNames() const
     return roles;
 }
 
-Question* QuestionModel::get(int index) const
+Question* QuestionModel::get(int index)
 {
     if (_questions == 0 || index < 0 || index > _questions->length() - 1)
     {
         return 0;
     }
+
+    _currentQuestionIndex = index;
 
     return _questions->at(index);
 }
@@ -121,6 +130,9 @@ Question* QuestionModel::get(int index) const
  */
 bool QuestionModel::fillModel(const QString &json)
 {
+    _lastError = "";
+    _responseCode = -1;
+
     // Clear old data.
     beginResetModel();
 
@@ -134,26 +146,85 @@ bool QuestionModel::fillModel(const QString &json)
     endResetModel();
 
     QJsonDocument document(QJsonDocument::fromJson(json.toLatin1()));
-    readJson(document.object());
+    return readJson(document.object());
+}
 
-    return true;
+Question* QuestionModel::getCurrentQuestion() const
+{
+    qDebug() << "Current question index: " << _currentQuestionIndex;
+
+    if (_questions == 0 || _currentQuestionIndex < 0 || _currentQuestionIndex > _questions->length() - 1)
+    {
+        qDebug() << "Current question not found...";
+        return 0;
+    }
+
+    qDebug() << "Current question: " << _questions->at(_currentQuestionIndex)->question();
+
+    return _questions->at(_currentQuestionIndex);
+}
+
+void QuestionModel::clearCurrentIndex()
+{
+    _currentQuestionIndex = -1;
+}
+
+QString QuestionModel::getLastError() const
+{
+    return _lastError;
+}
+
+int QuestionModel::getLastResponseCode() const
+{
+    return _responseCode;
 }
 
 /*!
  * \brief QuestionModel::readJson
  * \param object
  */
-void QuestionModel::readJson(const QJsonObject &object)
+bool QuestionModel::readJson(const QJsonObject &object)
 {
     // JSON contains response code and results.
     if (object.contains("response_code") && object.value("response_code").isDouble()
             && object.contains("results") && object.value("results").isArray())
     {
+        bool error = false;
+
         // Check response code.
         int responseCode = object.value("response_code").toInt(-1);
-        if (responseCode == -1)
+        _responseCode = responseCode;
+
+        switch (responseCode) {
+        case 0:
+            qDebug() << "Everything went fine.";
+            break;
+        case 1:
+            _lastError = "Not enough questions, change parameters.";
+            error = true;
+            break;
+        case 2:
+            _lastError = "Query parameters are not valid.";
+            error = true;
+            break;
+        case 3:
+            _lastError = "Token not found.";
+            error = true;
+            break;
+        case 4:
+            _lastError = "Token empty, change parameters.";
+            error = true;
+            break;
+        default:
+            _lastError = "Something went horribly wrong.";
+            error = true;
+            break;
+        }
+
+        // Return if the response code indicates error on loaded data.
+        if (error)
         {
-            return;
+            return false;
         }
 
         // Questions.
@@ -171,11 +242,18 @@ void QuestionModel::readJson(const QJsonObject &object)
 
         // End inserts.
         endInsertRows();
+
+        return true;
     }
     else // No response code -> something is wrong with the data.
     {
         // TODO: response code missing from questions JSON.
+        _lastError = "No response code.";
+        return false;
     }
+
+    _lastError = "Invalid data.";
+    return false;
 }
 
 /*!
@@ -208,8 +286,15 @@ void QuestionModel::readQuestion(const QJsonObject &json)
             answers.push_back(answs.at(j).toString());
         }
 
-        // Sort the answers.
-        std::sort(answers.begin(), answers.end());
+        // Sort the answers if the question type is boolean (True/False) and shuffle otherwise.
+        if (type == "boolean")
+        {
+            std::sort(answers.begin(), answers.end());
+        }
+        else
+        {
+            std::random_shuffle(answers.begin(), answers.end());
+        }
 
         Question *que = new Question(category, type, difficulty, quest, correct, answers);
 

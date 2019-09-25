@@ -218,6 +218,9 @@ Page {
             ++played.numericValue;
         }
 
+        // Clear current index.
+        questionModel.clearCurrentIndex();
+
         pageStack.replace(Qt.resolvedUrl("EndGamePage.qml"), {"totalCount": questionCount, "correctCount": correctCount, "incorrectCount": incorrectCount, "skippedCount": skippedCount});
     }
 }

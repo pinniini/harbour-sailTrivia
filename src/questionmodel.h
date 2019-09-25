@@ -21,6 +21,10 @@ public:
         AnswersRole = Qt::UserRole + 6
     };
 
+    Q_PROPERTY(QString error READ getLastError)
+
+    Q_PROPERTY(int responseCode READ getLastResponseCode)
+
     explicit QuestionModel(QObject *parent = 0);
 
     ~QuestionModel();
@@ -46,14 +50,25 @@ public:
      */
     QHash<int, QByteArray> roleNames() const;
 
-    Q_INVOKABLE Question* get(int index) const;
+    Q_INVOKABLE Question* get(int index);
 
     Q_INVOKABLE bool fillModel(const QString &json);
 
+    Q_INVOKABLE Question* getCurrentQuestion() const;
+
+    Q_INVOKABLE void clearCurrentIndex();
+
+    QString getLastError() const;
+
+    int getLastResponseCode() const;
+
 private:
     QVector<Question*> *_questions;
+    QString _lastError;
+    int _responseCode;
+    int _currentQuestionIndex;
 
-    void readJson(const QJsonObject &object);
+    bool readJson(const QJsonObject &object);
     void readQuestion(const QJsonObject &json);
 };
 

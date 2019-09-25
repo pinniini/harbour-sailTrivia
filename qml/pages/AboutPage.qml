@@ -38,7 +38,7 @@ Page {
             Label {
                 id: generalAboutLabel
                 wrapMode: Text.Wrap
-                width: parent.width - Theme.paddingMedium
+                width: parent.width - Theme.paddingMedium - Theme.paddingMedium
                 textFormat: Text.AutoText
                 x: Theme.paddingMedium
             }
@@ -106,6 +106,23 @@ Page {
             }
 
             SectionHeader {
+                text: qsTr("Credits")
+            }
+
+            Label {
+                id: applicationIcon
+                wrapMode: Text.Wrap
+                width: parent.width - Theme.paddingMedium
+                x: Theme.paddingMedium
+                text: Theme.highlightText(qsTr("Application icon: JSEHV"), "JSEHV", Theme.highlightColor)
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Qt.openUrlExternally("https://github.com/JSEHV")
+                }
+            }
+
+            SectionHeader {
                 text: qsTr("Ideas/Issues/Want to help")
             }
 
@@ -113,7 +130,7 @@ Page {
                 id: issueLabel
                 textFormat: Text.AutoText
                 wrapMode: Text.Wrap
-                width: parent.width - Theme.paddingMedium
+                width: parent.width - Theme.paddingMedium - Theme.paddingMedium
                 x: Theme.paddingMedium
 
                 MouseArea {

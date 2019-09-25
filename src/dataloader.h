@@ -29,6 +29,15 @@ public:
     /*!
      *
      */
+    Q_INVOKABLE void loadSessionToken();
+
+    Q_INVOKABLE void loadInitialData();
+
+    Q_INVOKABLE void stopInitialLoading();
+
+    /*!
+     *
+     */
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
 
     bool loading() const;
@@ -64,6 +73,23 @@ signals:
      */
     void dataLodingErrorOccured(const QString& errorMessage);
 
+    /*!
+     * \brief sessionTokenLoaded
+     * \param sessionToken
+     */
+    void sessionTokenLoaded(const QString& sessionToken);
+
+    /*!
+     * \brief sessionTokenLoadingError
+     * \param errorMessage
+     */
+    void sessionTokenLoadingError(const QString& errorMessage);
+
+    /*!
+     * \brief Signal to tell that the initial data (session token and categories) are loaded successfully.
+     */
+    void initialDataLoaded(const QString& categoriesData);
+
 public slots:
 
 private slots:
@@ -71,6 +97,8 @@ private slots:
     void questionsFinished();
     void errorLoadingData(QNetworkReply::NetworkError error);
     void downloadTimeout();
+    void sessionTokenFinished();
+    void errorLoadingSessionToken(QNetworkReply::NetworkError error);
 
 private:
     QNetworkAccessManager* _manager;
@@ -79,6 +107,15 @@ private:
     QNetworkReply* _reply;
     bool _loading;
     QTimer* _timeoutTimer;
+    bool _initialTokenLoaded;
+    bool _initialCategoriesLoaded;
+    QString _initialCategoriesData;
+    bool _initialDataLoading;
+
+    // Session token stuff.
+    QNetworkReply* _sessionTokenReply;
+    QString _sessionToken;
+    QString _sessionTokenUrl;
 
     /*!
      * \brief setLoadingStatus
@@ -95,6 +132,11 @@ private:
      * \brief cleanQuestionsRequest
      */
     void cleanQuestionsRequest();
+
+    /*!
+     * \brief cleanSessionTokenRequest
+     */
+    void cleanSessionTokenRequest();
 };
 
 #endif // DATALOADER_H

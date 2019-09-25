@@ -2,6 +2,8 @@
 #include <QJsonArray>
 #include <QDebug>
 
+#include <algorithm>
+
 #include "categorymodel.h"
 
 /*!
@@ -108,13 +110,18 @@ void CategoryModel::readJson(const QJsonObject &object)
 
         // Add All-category.
         Category all = Category(-1, "All");
-        _categories->append(all);
 
+        // Add categories.
         for (int i = 0; i < arr.size(); ++i)
         {
             QJsonObject cat = arr.at(i).toObject();
             readCategory(cat);
         }
+
+        // Sort categories.
+        std::sort(_categories->begin(), _categories->end());
+
+        _categories->prepend(all);
 
         endInsertRows();
     }
