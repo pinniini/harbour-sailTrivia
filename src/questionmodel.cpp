@@ -4,6 +4,8 @@
 #include <QtQml>
 
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
 
 #include "questionmodel.h"
 #include "jsonconstants.h"
@@ -16,6 +18,8 @@ using namespace JsonConstants;
  */
 QuestionModel::QuestionModel(QObject *parent) : QAbstractListModel(parent)
 {
+    std::srand(unsigned(std::time(0)));
+
     _questions = new QVector<Question*>();
     _lastError = "";
     _responseCode = -1;
@@ -282,8 +286,15 @@ void QuestionModel::readQuestion(const QJsonObject &json)
             answers.push_back(answs.at(j).toString());
         }
 
-        // Sort the answers.
-        std::sort(answers.begin(), answers.end());
+        // Sort the answers if the question type is boolean (True/False) and shuffle otherwise.
+        if (type == "boolean")
+        {
+            std::sort(answers.begin(), answers.end());
+        }
+        else
+        {
+            std::random_shuffle(answers.begin(), answers.end());
+        }
 
         Question *que = new Question(category, type, difficulty, quest, correct, answers);
 

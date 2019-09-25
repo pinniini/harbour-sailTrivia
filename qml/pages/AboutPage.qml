@@ -38,7 +38,7 @@ Page {
             Label {
                 id: generalAboutLabel
                 wrapMode: Text.Wrap
-                width: parent.width - Theme.paddingMedium
+                width: parent.width - Theme.paddingMedium - Theme.paddingMedium
                 textFormat: Text.AutoText
                 x: Theme.paddingMedium
             }
@@ -130,7 +130,7 @@ Page {
                 id: issueLabel
                 textFormat: Text.AutoText
                 wrapMode: Text.Wrap
-                width: parent.width - Theme.paddingMedium
+                width: parent.width - Theme.paddingMedium - Theme.paddingMedium
                 x: Theme.paddingMedium
 
                 MouseArea {

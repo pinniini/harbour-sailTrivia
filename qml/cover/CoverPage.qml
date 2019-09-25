@@ -56,7 +56,7 @@ CoverBackground {
         Label {
             id: questionLabel
             width: parent.width
-            height: parent.height - categoryLabel.height - difficultyLabel.height - parent.spacing - parent.spacing - Theme.paddingMedium - Theme.paddingMedium
+            height: parent.height - categoryLabel.height - difficultyLabel.height - parent.spacing - parent.spacing - Theme.paddingMedium - Theme.paddingSmall
             elide: Text.ElideRight
             text: ""
             maximumLineCount: 3
