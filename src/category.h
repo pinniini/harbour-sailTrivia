@@ -22,6 +22,8 @@ public:
      */
     QString name() const;
 
+    bool operator < (const Category &cat) const;
+
 signals:
 
 public slots:
