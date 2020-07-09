@@ -20,7 +20,7 @@ DataLoader::DataLoader(QObject *parent) : QObject(parent)
     _questionsBaseUrl = "https://opentdb.com/api.php?";
     _reply = 0;
     _timeoutTimer = new QTimer();
-    _timeoutTimer->setInterval(5000); // 5 seconds timeout by default.
+    _timeoutTimer->setInterval(10000); // 5 seconds timeout by default.
     _timeoutTimer->setSingleShot(true);
     _sessionToken = "";
     _sessionTokenUrl = "https://opentdb.com/api_token.php?command=request";
@@ -303,15 +303,6 @@ void DataLoader::categoriesFinished()
     // Clean stuff.
     cleanCategoriesRequest();
 
-//    qDebug() << "Categories: " << _initialCategoriesLoaded << ", Token: " << _initialTokenLoaded;
-//    // Categories were not loaded but session token was -> initial loading done.
-//    if (!_initialCategoriesLoaded && _initialTokenLoaded)
-//    {
-//        _initialCategoriesLoaded = true;
-//        emit initialDataLoaded(_initialCategoriesData);
-//        return;
-//    }
-
     _initialCategoriesLoaded = true;
 
     // If this was initial data loading.
@@ -402,7 +393,12 @@ void DataLoader::downloadTimeout()
 {
     if (!_reply->isFinished())
     {
+        disconnectRequest();
         _reply->abort();
+        delete _reply;
+        _reply = 0;
+
+        setLoadingStatus(false);
         QString errMsg = "Timeout occured while loading data.";
         emit dataLodingErrorOccured(errMsg);
     }
@@ -431,15 +427,6 @@ void DataLoader::sessionTokenFinished()
         // Clean the reply.
         cleanSessionTokenRequest();
 
-//        qDebug() << "Token: " << _initialTokenLoaded << ", Categories: " << _initialCategoriesLoaded;
-//        // Session token was not loaded but categories were -> initial loading done.
-//        if (!_initialTokenLoaded && _initialCategoriesLoaded)
-//        {
-//            _initialTokenLoaded = true;
-//            emit initialDataLoaded(_initialCategoriesData);
-//            return;
-//        }
-
         _initialTokenLoaded = true;
 
         emit sessionTokenLoaded(_sessionToken);
@@ -457,13 +444,6 @@ void DataLoader::sessionTokenFinished()
         cleanSessionTokenRequest();
 
         QString errorMessage = "Got something unexpected when loading session token.";
-
-//        if (!_initialTokenLoaded && _initialCategoriesLoaded)
-//        {
-//            _initialTokenLoaded = true;
-//            emit initialDataLoaded(_initialCategoriesData);
-//            return;
-//        }
 
         _initialTokenLoaded = true;
 
@@ -491,13 +471,6 @@ void DataLoader::errorLoadingSessionToken(QNetworkReply::NetworkError error)
         // Clean the reply.
         cleanSessionTokenRequest();
     }
-
-    // If initial data loading and error -> retry.
-//    if (_initialDataLoading)
-//    {
-//        loadSessionToken();
-//        return;
-//    }
 
     // Just for safety.
     _initialTokenLoaded = true;
@@ -543,4 +516,14 @@ void DataLoader::cleanSessionTokenRequest()
     disconnect(_sessionTokenReply, SIGNAL(finished()), this, SLOT(sessionTokenFinished()));
     delete _sessionTokenReply;
     _sessionTokenReply = 0;
+}
+
+void DataLoader::disconnectRequest()
+{
+    if (_reply)
+    {
+        disconnect(_reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(errorLoadingData(QNetworkReply::NetworkError)));
+        disconnect(_reply, SIGNAL(finished()), this, SLOT(categoriesFinished()));
+        disconnect(_reply, SIGNAL(finished()), this, SLOT(questionsFinished()));
+    }
 }
