@@ -12,7 +12,13 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
-* Sun Apr 13 2014 Jack Tar <jack.tar@example.com> 0.0.1-1
-- Scrubbed the deck
-- Hoisted the sails
+* Fri Jul 10 2020 Joni Korhonen 1.3.0
+- Fixed crash on question loading timeout
+- Increased default question loading timeout
 
+* Wed Sep 25 2019 Joni Korhonen 1.2.0
+- Added Splash screen which is shown while initial data is loading
+- Current question is now shown on the application cover
+- Fixed #19 Ordering categories alphabetically
+- Shuffle answers
+- New app icon
