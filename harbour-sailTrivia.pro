@@ -10,7 +10,7 @@
 #   - translation filenames have to be changed
 
 # Application version.
-VERSION = 1.3.0
+VERSION = 1.2.1
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 QT += network
