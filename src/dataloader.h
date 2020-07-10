@@ -137,6 +137,8 @@ private:
      * \brief cleanSessionTokenRequest
      */
     void cleanSessionTokenRequest();
+
+    void disconnectRequest();
 };
 
 #endif // DATALOADER_H
