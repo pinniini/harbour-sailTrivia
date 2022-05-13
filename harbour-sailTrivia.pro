@@ -10,7 +10,7 @@
 #   - translation filenames have to be changed
 
 # Application version.
-VERSION = 1.2.1
+VERSION = 1.3.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 QT += network
@@ -24,6 +24,7 @@ SOURCES += src/harbour-sailTrivia.cpp \
     src/dataloader.cpp \
     src/categorymodel.cpp \
     src/category.cpp \
+    src/migrator.cpp \
     src/question.cpp \
     src/questionmodel.cpp \
     src/statistics.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
     src/difficulty.h \
     src/categorymodel.h \
     src/category.h \
+    src/migrator.h \
     src/question.h \
     src/questionmodel.h \
     src/jsonconstants.h \
